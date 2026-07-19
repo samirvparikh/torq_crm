@@ -1,7 +1,6 @@
 @extends('layouts.crm')
 
 @section('title', $customer->name)
-@section('module', 'customers')
 
 @section('breadcrumb')
     <a href="{{ route('dashboard') }}">Home</a><span>&rsaquo;</span>

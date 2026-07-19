@@ -1,7 +1,6 @@
 @extends('layouts.crm')
 
 @section('title', 'Leads')
-@section('module', 'leads')
 
 @section('breadcrumb')
     <a href="{{ route('dashboard') }}">Home</a>
@@ -15,6 +14,11 @@
         <i class="bi bi-funnel"></i> Leads
     </div>
     <div class="crm-toolbar-actions">
+        @can('create', App\Models\Lead::class)
+            <button type="button" class="crm-btn crm-btn-primary-sm" id="lead-sync-btn">
+                <i class="bi bi-arrow-repeat"></i> Sync
+            </button>
+        @endcan
         <button type="button" class="crm-btn" id="lead-refresh-btn"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
         @can('create', App\Models\Lead::class)
             <a href="{{ route('leads.create') }}" class="crm-btn crm-btn-primary-sm"><i class="bi bi-plus-lg"></i> Create Lead</a>
@@ -121,6 +125,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('lead-filter-btn').addEventListener('click', () => loadLeads(1));
     document.getElementById('lead-refresh-btn').addEventListener('click', () => loadLeads(currentPage));
+    document.getElementById('lead-sync-btn')?.addEventListener('click', async () => {
+        const btn = document.getElementById('lead-sync-btn');
+        const original = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Syncing...';
+        try {
+            const res = await fetch('{{ route('leads.sync-indiamart') }}', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                },
+            });
+            const json = await res.json();
+            alert(json.message || (json.success ? 'Sync complete.' : 'Sync failed.'));
+            if (json.success) loadLeads(1);
+        } catch (err) {
+            alert('Sync failed. Please try again.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = original;
+        }
+    });
     pagination.addEventListener('click', (e) => {
         const btn = e.target.closest('button[data-page]');
         if (btn) loadLeads(parseInt(btn.dataset.page));

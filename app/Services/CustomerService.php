@@ -3,16 +3,12 @@
 namespace App\Services;
 
 use App\Models\Customer;
-use App\Repositories\Contracts\CustomerRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
 class CustomerService
 {
-    public function __construct(
-        protected CustomerRepositoryInterface $customerRepository,
-    ) {}
-
     /**
      * @param  array<string, mixed>  $data
      */
@@ -23,7 +19,7 @@ class CustomerService
             $addresses = $data['addresses'] ?? [];
             unset($data['contact_persons'], $data['addresses']);
 
-            $customer = $this->customerRepository->create($data);
+            $customer = Customer::query()->create($data);
 
             foreach ($contactPersons as $person) {
                 $customer->contactPersons()->create($person);
@@ -45,14 +41,15 @@ class CustomerService
         return DB::transaction(function () use ($customer, $data) {
             unset($data['contact_persons'], $data['addresses']);
 
-            return $this->customerRepository->update($customer, $data)
-                ->load(['company', 'contactPersons', 'addresses']);
+            $customer->update($data);
+
+            return $customer->fresh(['company', 'contactPersons', 'addresses']);
         });
     }
 
     public function delete(Customer $customer): bool
     {
-        return $this->customerRepository->delete($customer);
+        return (bool) $customer->delete();
     }
 
     /**
@@ -60,11 +57,29 @@ class CustomerService
      */
     public function list(array $filters = [], int $perPage = 25): LengthAwarePaginator
     {
-        return $this->customerRepository->paginate($filters, $perPage);
+        $query = Customer::query()
+            ->with(['company'])
+            ->latest('id');
+
+        if (! empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function (Builder $builder) use ($search) {
+                $builder->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('mobile', 'like', "%{$search}%")
+                    ->orWhere('whatsapp', 'like', "%{$search}%");
+            });
+        }
+
+        if (isset($filters['is_active'])) {
+            $query->where('is_active', (bool) $filters['is_active']);
+        }
+
+        return $query->paginate($perPage);
     }
 
     public function find(int $id): ?Customer
     {
-        return $this->customerRepository->findById($id);
+        return Customer::query()->with(['company', 'contactPersons', 'addresses'])->find($id);
     }
 }

@@ -10,7 +10,6 @@
     --crm-muted-light: #94a3b8;
     --crm-input-bg: #f8fafc;
     --crm-sidebar-width: 240px;
-    --crm-subsidebar-width: 220px;
     --crm-header-height: 56px;
     --crm-radius: 8px;
     --crm-radius-lg: 12px;
@@ -695,47 +694,6 @@ body.crm-app-body {
 }
 
 .crm-nav-link.active i { color: #fff; }
-
-/* ── Sub Sidebar ── */
-.crm-subsidebar {
-    width: var(--crm-subsidebar-width);
-    background: #fafbfc;
-    border-right: 1px solid var(--crm-border);
-    padding: 16px 0;
-    flex-shrink: 0;
-    overflow-y: auto;
-}
-
-.crm-subnav-group-title {
-    padding: 10px 20px 6px;
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--crm-muted-light);
-}
-
-.crm-subnav-link {
-    display: block;
-    padding: 9px 20px 9px 24px;
-    color: var(--crm-muted);
-    text-decoration: none;
-    font-size: 0.85rem;
-    border-left: 3px solid transparent;
-    transition: all 0.15s;
-}
-
-.crm-subnav-link:hover {
-    background: #eff6ff;
-    color: var(--crm-primary);
-}
-
-.crm-subnav-link.active {
-    background: #eff6ff;
-    color: var(--crm-primary);
-    border-left-color: var(--crm-primary);
-    font-weight: 600;
-}
 
 /* ── Main Content ── */
 .crm-main {
@@ -1438,7 +1396,7 @@ body.crm-app-body {
 
 @media (max-width: 768px) {
     .crm-form-grid { grid-template-columns: 1fr; }
-    .crm-sidebar, .crm-subsidebar { display: none; }
+    .crm-sidebar { display: none; }
     .crm-header-meta { display: none; }
     .crm-header-divider { display: none; }
     .crm-user-info { display: none; }

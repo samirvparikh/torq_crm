@@ -13,6 +13,7 @@ use App\Models\LeadSource;
 use App\Models\User;
 use App\Services\LeadAssignmentService;
 use App\Services\LeadService;
+use App\Services\IndiaMartLeadSyncService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -23,6 +24,7 @@ class LeadController extends Controller
     public function __construct(
         protected LeadService $leadService,
         protected LeadAssignmentService $assignmentService,
+        protected IndiaMartLeadSyncService $indiaMartLeadSyncService,
     ) {}
 
     public function index(Request $request): View
@@ -60,6 +62,31 @@ class LeadController extends Controller
                 'per_page' => $leads->perPage(),
                 'total' => $leads->total(),
             ],
+        ]);
+    }
+
+    public function syncIndiaMart(Request $request): JsonResponse
+    {
+        $this->authorize('create', Lead::class);
+
+        if (! $request->user()->can('indiamart.sync') && ! $request->user()->can('leads.create')) {
+            abort(403);
+        }
+
+        $result = $this->indiaMartLeadSyncService->sync($request->user());
+
+        $message = $result['total'] === 0
+            ? 'Sync complete: no records found in IndiaMART source table.'
+            : sprintf(
+                'Sync complete: %d inserted, %d skipped (already exist).',
+                $result['inserted'],
+                $result['skipped']
+            );
+
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+            'data' => $result,
         ]);
     }
 

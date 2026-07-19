@@ -16,10 +16,6 @@
     <div class="crm-app-shell">
         @include('partials.crm.sidebar')
 
-        @hasSection('module')
-            @include('partials.crm.sub-sidebar', ['module' => trim($__env->yieldContent('module'))])
-        @endif
-
         <main class="crm-main">
             @hasSection('breadcrumb')
                 <nav class="crm-breadcrumb">@yield('breadcrumb')</nav>

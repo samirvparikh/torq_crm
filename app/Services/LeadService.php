@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Enums\ActivityType;
 use App\Enums\LeadStatus;
-use App\Events\LeadAssigned;
 use App\Events\LeadCreated;
 use App\Events\LeadStatusChanged;
 use App\Models\Lead;
@@ -12,21 +11,21 @@ use App\Models\LeadActivity;
 use App\Models\LeadStatusLog;
 use App\Models\Setting;
 use App\Models\User;
-use App\Repositories\Contracts\LeadRepositoryInterface;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
 class LeadService
 {
     public function __construct(
-        protected LeadRepositoryInterface $leadRepository,
         protected LeadAssignmentService $assignmentService,
     ) {}
 
     public function generateLeadNumber(): string
     {
         $prefix = Setting::getValue('general', 'lead_number_prefix', config('leadcrm.lead_number_prefix', 'LD'));
-        $sequence = $this->leadRepository->getNextLeadNumberSequence();
+        $sequence = (Lead::withTrashed()->max('id') ?? 0) + 1;
 
         return sprintf('%s-%s', $prefix, str_pad((string) $sequence, 6, '0', STR_PAD_LEFT));
     }
@@ -37,7 +36,7 @@ class LeadService
     public function create(array $data, User $creator): Lead
     {
         return DB::transaction(function () use ($data, $creator) {
-            $duplicate = $this->leadRepository->findDuplicate(
+            $duplicate = $this->findDuplicate(
                 $data['indiamart_lead_id'] ?? null,
                 $data['mobile'] ?? null,
                 $data['email'] ?? null,
@@ -52,7 +51,7 @@ class LeadService
             $data['created_by'] = $creator->id;
             $data['status'] = $data['status'] ?? LeadStatus::New->value;
 
-            $lead = $this->leadRepository->create($data);
+            $lead = Lead::query()->create($data);
 
             $this->logActivity($lead, ActivityType::LeadCreated, 'Lead created', $creator);
 
@@ -80,7 +79,8 @@ class LeadService
 
             unset($data['status'], $data['assigned_to']);
 
-            $lead = $this->leadRepository->update($lead, $data);
+            $lead->update($data);
+            $lead = $lead->fresh();
 
             $this->logActivity($lead, ActivityType::Edited, 'Lead updated', $user);
 
@@ -99,7 +99,7 @@ class LeadService
 
     public function delete(Lead $lead): bool
     {
-        return $this->leadRepository->delete($lead);
+        return (bool) $lead->delete();
     }
 
     public function changeStatus(Lead $lead, LeadStatus $status, User $user, ?string $notes = null): Lead
@@ -116,7 +116,8 @@ class LeadService
             $updateData['lost_at'] = now();
         }
 
-        $lead = $this->leadRepository->update($lead, $updateData);
+        $lead->update($updateData);
+        $lead = $lead->fresh();
 
         LeadStatusLog::query()->create([
             'lead_id' => $lead->id,
@@ -139,14 +140,63 @@ class LeadService
     /**
      * @param  array<string, mixed>  $filters
      */
-    public function list(array $filters = [], int $perPage = 25)
+    public function list(array $filters = [], int $perPage = 25): LengthAwarePaginator
     {
-        return $this->leadRepository->paginate($filters, $perPage);
+        $query = Lead::query()
+            ->with(['leadSource', 'assignee', 'creator', 'category'])
+            ->latest('id');
+
+        $this->applyFilters($query, $filters);
+
+        return $query->paginate($perPage);
     }
 
     public function find(int $id): ?Lead
     {
-        return $this->leadRepository->findById($id);
+        return Lead::query()->with(['leadSource', 'assignee', 'category'])->find($id);
+    }
+
+    public function findByIndiamartId(string $indiamartLeadId): ?Lead
+    {
+        return Lead::query()->where('indiamart_lead_id', $indiamartLeadId)->first();
+    }
+
+    public function findDuplicate(?string $indiamartLeadId, ?string $mobile, ?string $email, ?string $companyName): ?Lead
+    {
+        if ($indiamartLeadId) {
+            $existing = $this->findByIndiamartId($indiamartLeadId);
+            if ($existing) {
+                return $existing;
+            }
+        }
+
+        if (! $mobile && ! $email && ! $companyName) {
+            return null;
+        }
+
+        return Lead::query()
+            ->where(function (Builder $builder) use ($mobile, $email, $companyName) {
+                $hasCondition = false;
+
+                if ($mobile) {
+                    $builder->where('mobile', $mobile);
+                    $hasCondition = true;
+                }
+
+                if ($email) {
+                    $hasCondition
+                        ? $builder->orWhere('email', $email)
+                        : $builder->where('email', $email);
+                    $hasCondition = true;
+                }
+
+                if ($companyName) {
+                    $hasCondition
+                        ? $builder->orWhere('company_name', $companyName)
+                        : $builder->where('company_name', $companyName);
+                }
+            })
+            ->first();
     }
 
     public function logActivity(
@@ -165,5 +215,59 @@ class LeadService
             'causer_id' => $user?->id,
             'ip_address' => request()->ip(),
         ]);
+    }
+
+    /**
+     * @param  Builder<Lead>  $query
+     * @param  array<string, mixed>  $filters
+     */
+    protected function applyFilters(Builder $query, array $filters): void
+    {
+        if (! empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function (Builder $builder) use ($search) {
+                $builder->where('lead_number', 'like', "%{$search}%")
+                    ->orWhere('customer_name', 'like', "%{$search}%")
+                    ->orWhere('company_name', 'like', "%{$search}%")
+                    ->orWhere('mobile', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        if (! empty($filters['lead_source_id'])) {
+            $query->where('lead_source_id', $filters['lead_source_id']);
+        }
+
+        if (! empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        if (! empty($filters['priority'])) {
+            $query->where('priority', $filters['priority']);
+        }
+
+        if (! empty($filters['assigned_to'])) {
+            $query->where('assigned_to', $filters['assigned_to']);
+        }
+
+        if (! empty($filters['state'])) {
+            $query->where('state', $filters['state']);
+        }
+
+        if (! empty($filters['city'])) {
+            $query->where('city', $filters['city']);
+        }
+
+        if (! empty($filters['date_from'])) {
+            $query->whereDate('created_at', '>=', $filters['date_from']);
+        }
+
+        if (! empty($filters['date_to'])) {
+            $query->whereDate('created_at', '<=', $filters['date_to']);
+        }
+
+        if (! empty($filters['assigned_only']) && ! empty($filters['user_id'])) {
+            $query->where('assigned_to', $filters['user_id']);
+        }
     }
 }

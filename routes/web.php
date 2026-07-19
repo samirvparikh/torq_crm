@@ -24,6 +24,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('leads')->name('leads.')->middleware('permission:leads.view')->group(function () {
         Route::get('/', [LeadController::class, 'index'])->name('index');
         Route::get('/datatable', [LeadController::class, 'datatable'])->name('datatable');
+        Route::post('/sync-indiamart', [LeadController::class, 'syncIndiaMart'])
+            ->middleware('permission:leads.create')
+            ->name('sync-indiamart');
         Route::get('/create', [LeadController::class, 'create'])->middleware('permission:leads.create')->name('create');
         Route::post('/', [LeadController::class, 'store'])->middleware('permission:leads.create')->name('store');
         Route::get('/{lead}', [LeadController::class, 'show'])->name('show');
