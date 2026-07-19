@@ -43,6 +43,21 @@
 
         <div class="crm-nav-section">
             <div class="crm-nav-section-title">Administration</div>
+            @can('users.view')
+                <a href="{{ route('users.index') }}" class="crm-nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
+                    <i class="bi bi-person-gear"></i> Users
+                </a>
+            @endcan
+            @can('roles.view')
+                <a href="{{ route('roles.index') }}" class="crm-nav-link {{ request()->routeIs('roles.*') ? 'active' : '' }}">
+                    <i class="bi bi-shield-lock"></i> Roles
+                </a>
+            @endcan
+            @can('permissions.view')
+                <a href="{{ route('permissions.index') }}" class="crm-nav-link {{ request()->routeIs('permissions.*') ? 'active' : '' }}">
+                    <i class="bi bi-key"></i> Permissions
+                </a>
+            @endcan
             <a href="{{ route('profile.edit') }}" class="crm-nav-link {{ request()->routeIs('profile.*') ? 'active' : '' }}">
                 <i class="bi bi-gear"></i> Settings
             </a>

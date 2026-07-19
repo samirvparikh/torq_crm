@@ -4,13 +4,18 @@ use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\LeadController;
+use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\QuotationController;
+use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\TaskController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::redirect('/', '/login');
+Route::get('/', function () {
+    return redirect()->route('login');
+});
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])
@@ -76,6 +81,28 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/', [TaskController::class, 'store'])->middleware('permission:tasks.create')->name('store');
         Route::put('/{task}', [TaskController::class, 'update'])->middleware('permission:tasks.edit')->name('update');
         Route::delete('/{task}', [TaskController::class, 'destroy'])->middleware('permission:tasks.delete')->name('destroy');
+    });
+
+    Route::prefix('users')->name('users.')->middleware('permission:users.view')->group(function () {
+        Route::get('/', [UserController::class, 'index'])->name('index');
+        Route::get('/datatable', [UserController::class, 'datatable'])->name('datatable');
+        Route::post('/', [UserController::class, 'store'])->middleware('permission:users.create')->name('store');
+        Route::put('/{user}', [UserController::class, 'update'])->middleware('permission:users.edit')->name('update');
+        Route::delete('/{user}', [UserController::class, 'destroy'])->middleware('permission:users.delete')->name('destroy');
+    });
+
+    Route::prefix('roles')->name('roles.')->middleware('permission:roles.view')->group(function () {
+        Route::get('/', [RoleController::class, 'index'])->name('index');
+        Route::get('/datatable', [RoleController::class, 'datatable'])->name('datatable');
+        Route::post('/', [RoleController::class, 'store'])->middleware('permission:roles.create')->name('store');
+        Route::put('/{role}', [RoleController::class, 'update'])->middleware('permission:roles.edit')->name('update');
+        Route::delete('/{role}', [RoleController::class, 'destroy'])->middleware('permission:roles.delete')->name('destroy');
+    });
+
+    Route::prefix('permissions')->name('permissions.')->middleware('permission:permissions.view')->group(function () {
+        Route::get('/', [PermissionController::class, 'index'])->name('index');
+        Route::get('/datatable', [PermissionController::class, 'datatable'])->name('datatable');
+        Route::post('/sync', [PermissionController::class, 'sync'])->middleware('permission:permissions.edit')->name('sync');
     });
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
