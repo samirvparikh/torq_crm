@@ -24,6 +24,46 @@ class RolePermissionSeeder extends Seeder
             $role->syncPermissions($permissions);
         }
 
+        $this->migrateLegacyRoles();
+        $this->removeObsoleteRoles();
+
         $this->command?->info('Roles seeded: '.implode(', ', RoleName::values()));
+    }
+
+    protected function migrateLegacyRoles(): void
+    {
+        $map = [
+            'Sales Manager' => RoleName::Manager->value,
+            'Sales Executive' => RoleName::Manager->value,
+            'Tele Caller' => RoleName::Manager->value,
+            'Viewer' => RoleName::Marketing->value,
+        ];
+
+        foreach ($map as $oldName => $newName) {
+            $oldRole = Role::query()->where('name', $oldName)->where('guard_name', 'web')->first();
+            $newRole = Role::query()->where('name', $newName)->where('guard_name', 'web')->first();
+
+            if (! $oldRole || ! $newRole) {
+                continue;
+            }
+
+            foreach ($oldRole->users as $user) {
+                $user->syncRoles([$newName]);
+            }
+        }
+    }
+
+    protected function removeObsoleteRoles(): void
+    {
+        $allowed = RoleName::values();
+
+        Role::query()
+            ->where('guard_name', 'web')
+            ->whereNotIn('name', $allowed)
+            ->get()
+            ->each(function (Role $role) {
+                $role->syncPermissions([]);
+                $role->delete();
+            });
     }
 }

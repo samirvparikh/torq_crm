@@ -35,7 +35,7 @@ indiamart_lead/
 ├── bootstrap/
 ├── config/
 │   ├── indiamart.php             # IndiaMART API & sync settings
-│   └── leadcrm.php               # Application settings
+│   └── torqcrm.php               # Application settings
 ├── database/
 │   ├── factories/
 │   ├── migrations/

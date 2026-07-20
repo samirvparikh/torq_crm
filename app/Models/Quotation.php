@@ -20,6 +20,10 @@ class Quotation extends Model
         'lead_id',
         'customer_id',
         'company_id',
+        'subject',
+        'intro_text',
+        'signatory_name',
+        'signatory_phone',
         'quotation_date',
         'valid_until',
         'status',
@@ -27,9 +31,11 @@ class Quotation extends Model
         'discount_type',
         'discount_value',
         'discount_amount',
+        'tax_type',
         'tax_amount',
         'total',
         'terms',
+        'quotation_term_template_id',
         'notes',
         'pdf_path',
         'created_by',
@@ -74,6 +80,11 @@ class Quotation extends Model
     public function items(): HasMany
     {
         return $this->hasMany(QuotationItem::class)->orderBy('sort_order');
+    }
+
+    public function termTemplate(): BelongsTo
+    {
+        return $this->belongsTo(QuotationTermTemplate::class, 'quotation_term_template_id');
     }
 
     public function attachments(): MorphMany

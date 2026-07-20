@@ -4,11 +4,11 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | LeadCRM Application Settings
+    | TorqCRM Application Settings
     |--------------------------------------------------------------------------
     */
 
-    'name' => env('APP_NAME', 'LeadCRM'),
+    'name' => env('APP_NAME', 'TorqCRM'),
 
     'lead_number_prefix' => env('LEAD_NUMBER_PREFIX', 'LD'),
 

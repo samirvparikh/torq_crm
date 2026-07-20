@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\RoleName;
 use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -19,7 +20,7 @@ class AdminAccessTest extends TestCase
     public function test_super_admin_can_access_admin_pages(): void
     {
         $user = User::factory()->create();
-        $user->assignRole('Super Admin');
+        $user->assignRole(RoleName::SuperAdmin->value);
 
         $this->actingAs($user)
             ->get(route('users.index'))
@@ -37,17 +38,27 @@ class AdminAccessTest extends TestCase
     public function test_admin_can_access_admin_pages(): void
     {
         $user = User::factory()->create();
-        $user->assignRole('Admin');
+        $user->assignRole(RoleName::Admin->value);
 
         $this->actingAs($user)->get(route('users.index'))->assertOk();
         $this->actingAs($user)->get(route('roles.index'))->assertOk();
         $this->actingAs($user)->get(route('permissions.index'))->assertOk();
     }
 
-    public function test_sales_manager_cannot_access_admin_pages(): void
+    public function test_manager_cannot_access_admin_pages(): void
     {
         $user = User::factory()->create();
-        $user->assignRole('Sales Manager');
+        $user->assignRole(RoleName::Manager->value);
+
+        $this->actingAs($user)->get(route('users.index'))->assertForbidden();
+        $this->actingAs($user)->get(route('roles.index'))->assertForbidden();
+        $this->actingAs($user)->get(route('permissions.index'))->assertForbidden();
+    }
+
+    public function test_marketing_cannot_access_admin_pages(): void
+    {
+        $user = User::factory()->create();
+        $user->assignRole(RoleName::Marketing->value);
 
         $this->actingAs($user)->get(route('users.index'))->assertForbidden();
         $this->actingAs($user)->get(route('roles.index'))->assertForbidden();
@@ -57,7 +68,7 @@ class AdminAccessTest extends TestCase
     public function test_roles_datatable_loads(): void
     {
         $user = User::factory()->create();
-        $user->assignRole('Super Admin');
+        $user->assignRole(RoleName::SuperAdmin->value);
 
         $this->actingAs($user)
             ->getJson(route('roles.datatable'))
@@ -66,5 +77,6 @@ class AdminAccessTest extends TestCase
             ->assertJsonStructure(['data', 'meta']);
 
         $this->assertTrue(Role::query()->exists());
+        $this->assertEqualsCanonicalizing(RoleName::values(), Role::query()->pluck('name')->all());
     }
 }

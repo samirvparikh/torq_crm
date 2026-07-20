@@ -27,7 +27,7 @@ class CompanyController extends Controller
         $this->authorize('viewAny', Company::class);
 
         $companies = $this->companyService->list(
-            $request->only(['search']),
+            $request->only(['search', 'sort_by', 'sort_dir']),
             (int) $request->input('per_page', 25)
         );
 

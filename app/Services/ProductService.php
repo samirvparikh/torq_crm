@@ -36,7 +36,7 @@ class ProductService
      */
     public function list(array $filters = [], int $perPage = 25): LengthAwarePaginator
     {
-        $query = Product::query()->with('category')->latest('id');
+        $query = Product::query()->with('category');
 
         if (! empty($filters['search'])) {
             $search = $filters['search'];
@@ -49,6 +49,10 @@ class ProductService
         if (! empty($filters['category_id'])) {
             $query->where('category_id', $filters['category_id']);
         }
+
+        \App\Support\DatatableSort::apply($query, $filters, [
+            'id', 'name', 'sku', 'category_id', 'price', 'tax_rate', 'is_active', 'created_at',
+        ], 'id', 'desc');
 
         return $query->paginate($perPage);
     }

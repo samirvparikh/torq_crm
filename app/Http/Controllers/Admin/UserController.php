@@ -34,7 +34,7 @@ class UserController extends Controller
         $this->authorize('viewAny', User::class);
 
         $users = $this->userService->list(
-            $request->only(['search', 'is_active', 'role']),
+            $request->only(['search', 'is_active', 'role', 'sort_by', 'sort_dir']),
             (int) $request->input('per_page', 25)
         );
 

@@ -18,7 +18,7 @@ class TaskPolicy
             return false;
         }
 
-        if ($user->hasAnyRole(['Super Admin', 'Admin', 'Sales Manager'])) {
+        if ($user->seesUnrestrictedRecords()) {
             return true;
         }
 
@@ -36,7 +36,7 @@ class TaskPolicy
             return false;
         }
 
-        if ($user->hasAnyRole(['Super Admin', 'Admin', 'Sales Manager'])) {
+        if ($user->seesUnrestrictedRecords()) {
             return true;
         }
 

@@ -28,12 +28,13 @@
             <table class="crm-table">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Phone</th>
-                        <th>Email</th>
-                        <th>GST</th>
-                        <th>City</th>
-                        <th>Status</th>
+                        <th>#</th>
+                        <th data-sort="name" data-dir="asc">Name</th>
+                        <th data-sort="phone" data-dir="asc">Phone</th>
+                        <th data-sort="email" data-dir="asc">Email</th>
+                        <th data-sort="gst_number" data-dir="asc">GST</th>
+                        <th data-sort="city" data-dir="asc">City</th>
+                        <th data-sort="is_active" data-dir="asc">Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -82,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('modal');
     const form = document.getElementById('company-form');
     const tbody = document.getElementById('table-body');
+    const tableSort = CrmTable.create({ sort_by: 'id', sort_dir: 'desc' });
     let currentPage = 1, editId = null;
     const canEdit = @json(auth()->user()->can('companies.edit'));
     const canDelete = @json(auth()->user()->can('companies.delete'));
@@ -103,11 +105,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function closeModal() { modal.style.display = 'none'; editId = null; }
 
     async function load(page = 1) {
-        const params = new URLSearchParams({ page, search: document.getElementById('search').value });
+        const params = new URLSearchParams(tableSort.params({ page, search: document.getElementById('search').value }));
         const res = await fetch(`{{ route('companies.datatable') }}?${params}`, { headers: { 'Accept': 'application/json' } });
         const json = await res.json();
-        tbody.innerHTML = (json.data || []).map(row => `
+        const m = json.meta;
+        tbody.innerHTML = (json.data || []).map((row, i) => `
             <tr>
+                <td class="crm-sr">${tableSort.sr(m, i)}</td>
                 <td><strong>${row.name}</strong></td>
                 <td>${row.phone || '—'}</td>
                 <td>${row.email || '—'}</td>
@@ -118,8 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${canEdit ? `<button type="button" data-edit='${JSON.stringify(row).replace(/'/g,"&#39;")}'><i class="bi bi-pencil"></i></button>` : ''}
                     ${canDelete ? `<button type="button" data-delete="${row.id}"><i class="bi bi-trash"></i></button>` : ''}
                 </td>
-            </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--crm-muted);">No companies found</td></tr>';
-        const m = json.meta;
+            </tr>`).join('') || '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--crm-muted);">No companies found</td></tr>';
         document.getElementById('record-info').textContent = `Showing ${m.total ? (m.current_page-1)*m.per_page+1 : 0}-${Math.min(m.current_page*m.per_page,m.total)} of ${m.total} records`;
         document.getElementById('pagination').innerHTML = `<button ${m.current_page<=1?'disabled':''} data-page="${m.current_page-1}">&lsaquo;</button><span class="active">${m.current_page}</span><button ${m.current_page>=m.last_page?'disabled':''} data-page="${m.current_page+1}">&rsaquo;</button>`;
         currentPage = m.current_page;
@@ -128,6 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('add-btn')?.addEventListener('click', () => openModal('Add Company'));
     document.getElementById('modal-close').addEventListener('click', closeModal);
     document.getElementById('modal-cancel').addEventListener('click', closeModal);
+    tableSort.bind(document.querySelector('.crm-table'), load);
     document.getElementById('filter-btn').addEventListener('click', () => load(1));
     document.getElementById('refresh-btn').addEventListener('click', () => load(currentPage));
     document.getElementById('pagination').addEventListener('click', e => { const b = e.target.closest('button[data-page]'); if (b) load(+b.dataset.page); });

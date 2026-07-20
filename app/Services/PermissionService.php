@@ -15,8 +15,7 @@ class PermissionService
     public function list(array $filters = [], int $perPage = 50): LengthAwarePaginator
     {
         $query = Permission::query()
-            ->withCount('roles')
-            ->orderBy('name');
+            ->withCount('roles');
 
         if (! empty($filters['search'])) {
             $search = $filters['search'];
@@ -26,6 +25,10 @@ class PermissionService
         if (! empty($filters['group'])) {
             $query->where('name', 'like', $filters['group'].'.%');
         }
+
+        \App\Support\DatatableSort::apply($query, $filters, [
+            'id', 'name', 'guard_name', 'created_at',
+        ], 'name', 'asc');
 
         return $query->paginate($perPage);
     }

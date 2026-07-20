@@ -19,6 +19,12 @@ class Product extends Model
         'name',
         'sku',
         'description',
+        'capacity',
+        'operation',
+        'technical_specifications',
+        'input_specifications',
+        'salient_features',
+        'utility_requirements',
         'unit',
         'price',
         'tax_rate',
@@ -33,6 +39,10 @@ class Product extends Model
             'price' => 'decimal:2',
             'tax_rate' => 'decimal:2',
             'is_active' => 'boolean',
+            'technical_specifications' => 'array',
+            'input_specifications' => 'array',
+            'salient_features' => 'array',
+            'utility_requirements' => 'array',
         ];
     }
 

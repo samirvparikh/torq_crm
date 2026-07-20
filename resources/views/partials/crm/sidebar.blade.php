@@ -1,66 +1,77 @@
-<aside class="crm-sidebar">
-    <div class="crm-sidebar-search">
+<aside class="crm-sidebar" id="crm-sidebar">
+    {{-- <div class="crm-sidebar-search">
+        <i class="bi bi-search"></i>
         <input type="text" placeholder="searchMenu" id="sidebar-search">
-    </div>
+    </div> --}}
 
     <nav>
         <div class="crm-nav-section">
             <div class="crm-nav-section-title">Operations</div>
-            <a href="{{ route('dashboard') }}" class="crm-nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                <i class="bi bi-speedometer2"></i> Dashboard
+            <a href="{{ route('dashboard') }}" class="crm-nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" title="Dashboard">
+                <i class="bi bi-speedometer2"></i><span class="crm-nav-label">Dashboard</span>
             </a>
             @can('viewAny', App\Models\Lead::class)
-                <a href="{{ route('leads.index') }}" class="crm-nav-link {{ request()->routeIs('leads.*') ? 'active' : '' }}">
-                    <i class="bi bi-funnel"></i> Leads
+                <a href="{{ route('leads.index') }}" class="crm-nav-link {{ request()->routeIs('leads.*') ? 'active' : '' }}" title="Leads">
+                    <i class="bi bi-funnel"></i><span class="crm-nav-label">Leads</span>
                 </a>
             @endcan
             @can('viewAny', App\Models\Customer::class)
-                <a href="{{ route('customers.index') }}" class="crm-nav-link {{ request()->routeIs('customers.*') ? 'active' : '' }}">
-                    <i class="bi bi-people"></i> Customers
+                <a href="{{ route('customers.index') }}" class="crm-nav-link {{ request()->routeIs('customers.*') ? 'active' : '' }}" title="Customers">
+                    <i class="bi bi-people"></i><span class="crm-nav-label">Customers</span>
                 </a>
             @endcan
             @can('viewAny', App\Models\Company::class)
-                <a href="{{ route('companies.index') }}" class="crm-nav-link {{ request()->routeIs('companies.*') ? 'active' : '' }}">
-                    <i class="bi bi-building"></i> Companies
+                <a href="{{ route('companies.index') }}" class="crm-nav-link {{ request()->routeIs('companies.*') ? 'active' : '' }}" title="Companies">
+                    <i class="bi bi-building"></i><span class="crm-nav-label">Companies</span>
                 </a>
             @endcan
             @can('viewAny', App\Models\Product::class)
-                <a href="{{ route('products.index') }}" class="crm-nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}">
-                    <i class="bi bi-box-seam"></i> Products
+                <a href="{{ route('products.index') }}" class="crm-nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}" title="Products">
+                    <i class="bi bi-box-seam"></i><span class="crm-nav-label">Products</span>
                 </a>
             @endcan
             @can('viewAny', App\Models\Quotation::class)
-                <a href="{{ route('quotations.index') }}" class="crm-nav-link {{ request()->routeIs('quotations.*') ? 'active' : '' }}">
-                    <i class="bi bi-file-earmark-text"></i> Quotations
+                <a href="{{ route('quotations.index') }}" class="crm-nav-link {{ request()->routeIs('quotations.*') ? 'active' : '' }}" title="Quotations">
+                    <i class="bi bi-file-earmark-text"></i><span class="crm-nav-label">Quotations</span>
+                </a>
+                <a href="{{ route('quotation-terms.index') }}" class="crm-nav-link {{ request()->routeIs('quotation-terms.*') ? 'active' : '' }}" title="Quotation Terms">
+                    <i class="bi bi-card-checklist"></i><span class="crm-nav-label">Quotation Terms</span>
                 </a>
             @endcan
             @can('viewAny', App\Models\Task::class)
-                <a href="{{ route('tasks.index') }}" class="crm-nav-link {{ request()->routeIs('tasks.*') ? 'active' : '' }}">
-                    <i class="bi bi-list-check"></i> Tasks
+                <a href="{{ route('tasks.index') }}" class="crm-nav-link {{ request()->routeIs('tasks.*') ? 'active' : '' }}" title="Tasks">
+                    <i class="bi bi-list-check"></i><span class="crm-nav-label">Tasks</span>
                 </a>
             @endcan
         </div>
 
-        <div class="crm-nav-section">
-            <div class="crm-nav-section-title">Administration</div>
-            @can('users.view')
-                <a href="{{ route('users.index') }}" class="crm-nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
-                    <i class="bi bi-person-gear"></i> Users
+        @if (auth()->user()?->canAccessAdministration())
+            <div class="crm-nav-section">
+                <div class="crm-nav-section-title">Administration</div>
+                @can('users.view')
+                    <a href="{{ route('users.index') }}" class="crm-nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}" title="Users">
+                        <i class="bi bi-person-gear"></i><span class="crm-nav-label">Users</span>
+                    </a>
+                @endcan
+                @can('roles.view')
+                    <a href="{{ route('roles.index') }}" class="crm-nav-link {{ request()->routeIs('roles.*') ? 'active' : '' }}" title="Roles">
+                        <i class="bi bi-shield-lock"></i><span class="crm-nav-label">Roles</span>
+                    </a>
+                @endcan
+                @can('permissions.view')
+                    <a href="{{ route('permissions.index') }}" class="crm-nav-link {{ request()->routeIs('permissions.*') ? 'active' : '' }}" title="Permissions">
+                        <i class="bi bi-key"></i><span class="crm-nav-label">Permissions</span>
+                    </a>
+                @endcan
+                @can('settings.view')
+                    <a href="{{ route('settings.company.edit') }}" class="crm-nav-link {{ request()->routeIs('settings.company.*') ? 'active' : '' }}" title="Company Profile">
+                        <i class="bi bi-building-gear"></i><span class="crm-nav-label">Company Profile</span>
+                    </a>
+                @endcan
+                <a href="{{ route('profile.edit') }}" class="crm-nav-link {{ request()->routeIs('profile.*') ? 'active' : '' }}" title="Settings">
+                    <i class="bi bi-gear"></i><span class="crm-nav-label">Settings</span>
                 </a>
-            @endcan
-            @can('roles.view')
-                <a href="{{ route('roles.index') }}" class="crm-nav-link {{ request()->routeIs('roles.*') ? 'active' : '' }}">
-                    <i class="bi bi-shield-lock"></i> Roles
-                </a>
-            @endcan
-            @can('permissions.view')
-                <a href="{{ route('permissions.index') }}" class="crm-nav-link {{ request()->routeIs('permissions.*') ? 'active' : '' }}">
-                    <i class="bi bi-key"></i> Permissions
-                </a>
-            @endcan
-            <a href="{{ route('profile.edit') }}" class="crm-nav-link {{ request()->routeIs('profile.*') ? 'active' : '' }}">
-                <i class="bi bi-gear"></i> Settings
-            </a>
-        </div>
+            </div>
+        @endif
     </nav>
 </aside>

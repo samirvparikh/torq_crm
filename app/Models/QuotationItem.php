@@ -16,6 +16,13 @@ class QuotationItem extends Model
         'product_id',
         'product_name',
         'description',
+        'capacity',
+        'operation',
+        'technical_specifications',
+        'input_specifications',
+        'salient_features',
+        'utility_requirements',
+        'include_catalog',
         'unit',
         'quantity',
         'unit_price',
@@ -36,6 +43,11 @@ class QuotationItem extends Model
             'discount' => 'decimal:2',
             'total' => 'decimal:2',
             'sort_order' => 'integer',
+            'include_catalog' => 'boolean',
+            'technical_specifications' => 'array',
+            'input_specifications' => 'array',
+            'salient_features' => 'array',
+            'utility_requirements' => 'array',
         ];
     }
 

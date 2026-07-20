@@ -54,7 +54,7 @@ No duplicate code
 
 Project Name
 
-LeadCRM
+TorqCRM
 
 -----------------------------------------------------
 

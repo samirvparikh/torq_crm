@@ -33,11 +33,12 @@
             <table class="crm-table">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Mobile</th>
-                        <th>Email</th>
-                        <th>Company</th>
-                        <th>Status</th>
+                        <th>#</th>
+                        <th data-sort="name" data-dir="asc">Name</th>
+                        <th data-sort="mobile" data-dir="asc">Mobile</th>
+                        <th data-sort="email" data-dir="asc">Email</th>
+                        <th data-sort="company_id" data-dir="asc">Company</th>
+                        <th data-sort="is_active" data-dir="asc">Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -57,21 +58,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const tbody = document.getElementById('table-body');
     const pagination = document.getElementById('pagination');
     const recordInfo = document.getElementById('record-info');
+    const tableSort = CrmTable.create({ sort_by: 'id', sort_dir: 'desc' });
     let currentPage = 1;
     const canDelete = @json(auth()->user()->can('customers.delete'));
 
     async function load(page = 1) {
-        const params = new URLSearchParams({
+        const params = new URLSearchParams(tableSort.params({
             page,
             search: document.getElementById('search').value,
             is_active: document.getElementById('is_active').value,
-        });
+        }));
         const res = await fetch(`{{ route('customers.datatable') }}?${params}`, {
             headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
         });
         const json = await res.json();
-        tbody.innerHTML = (json.data || []).map(row => `
+        const meta = json.meta;
+        tbody.innerHTML = (json.data || []).map((row, i) => `
             <tr>
+                <td class="crm-sr">${tableSort.sr(meta, i)}</td>
                 <td><strong>${row.name}</strong></td>
                 <td>${row.mobile || '—'}</td>
                 <td>${row.email || '—'}</td>
@@ -83,9 +87,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${canDelete ? `<button type="button" data-delete="${row.id}" title="Delete"><i class="bi bi-trash"></i></button>` : ''}
                 </td>
             </tr>
-        `).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--crm-muted);padding:32px;">No customers found</td></tr>';
+        `).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--crm-muted);padding:32px;">No customers found</td></tr>';
 
-        const meta = json.meta;
         const from = meta.total ? ((meta.current_page - 1) * meta.per_page + 1) : 0;
         const to = Math.min(meta.current_page * meta.per_page, meta.total);
         recordInfo.textContent = `Showing ${from}-${to} of ${meta.total} records`;
@@ -96,6 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentPage = meta.current_page;
     }
 
+    tableSort.bind(document.querySelector('.crm-table'), load);
     document.getElementById('filter-btn').addEventListener('click', () => load(1));
     document.getElementById('refresh-btn').addEventListener('click', () => load(currentPage));
     pagination.addEventListener('click', e => {

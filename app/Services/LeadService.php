@@ -24,7 +24,7 @@ class LeadService
 
     public function generateLeadNumber(): string
     {
-        $prefix = Setting::getValue('general', 'lead_number_prefix', config('leadcrm.lead_number_prefix', 'LD'));
+        $prefix = Setting::getValue('general', 'lead_number_prefix', config('torq_packaging.lead_number_prefix', 'LD'));
         $sequence = (Lead::withTrashed()->max('id') ?? 0) + 1;
 
         return sprintf('%s-%s', $prefix, str_pad((string) $sequence, 6, '0', STR_PAD_LEFT));
@@ -143,10 +143,14 @@ class LeadService
     public function list(array $filters = [], int $perPage = 25): LengthAwarePaginator
     {
         $query = Lead::query()
-            ->with(['leadSource', 'assignee', 'creator', 'category'])
-            ->latest('id');
+            ->with(['leadSource', 'assignee', 'creator', 'category']);
 
         $this->applyFilters($query, $filters);
+
+        \App\Support\DatatableSort::apply($query, $filters, [
+            'id', 'lead_number', 'customer_name', 'mobile', 'email', 'status',
+            'assigned_to', 'lead_source_id', 'created_at', 'updated_at',
+        ], 'id', 'desc');
 
         return $query->paginate($perPage);
     }

@@ -1,4 +1,5 @@
 import './bootstrap';
+import './crm-table';
 
 import Alpine from 'alpinejs';
 

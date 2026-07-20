@@ -29,7 +29,7 @@ class PermissionController extends Controller
         abort_unless(auth()->user()->can('permissions.view'), 403);
 
         $permissions = $this->permissionService->list(
-            $request->only(['search', 'group']),
+            $request->only(['search', 'group', 'sort_by', 'sort_dir']),
             (int) $request->input('per_page', 50)
         );
 

@@ -1,4 +1,4 @@
-# LeadCRM — Installation Guide
+# TorqCRM — Installation Guide
 
 ## Requirements
 
@@ -28,13 +28,13 @@ php artisan key:generate
 Key settings in `.env`:
 
 ```env
-APP_NAME=LeadCRM
+APP_NAME=Torq CRM
 APP_URL=http://localhost/indiamart_lead/public
 
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=leadcrm
+DB_DATABASE=torq_packaging
 DB_USERNAME=root
 DB_PASSWORD=
 
@@ -54,7 +54,7 @@ INDIAMART_SYNC_INTERVAL=30
 Create the MySQL database:
 
 ```sql
-CREATE DATABASE leadcrm CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE torq_packaging CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
 ## Step 4 — Run Migrations & Seeders

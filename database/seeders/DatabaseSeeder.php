@@ -13,6 +13,8 @@ class DatabaseSeeder extends Seeder
             LeadSourceSeeder::class,
             CategorySeeder::class,
             SettingSeeder::class,
+            QuotationMasterSeeder::class,
+            SampleMachineProductSeeder::class,
             AdminUserSeeder::class,
         ]);
     }

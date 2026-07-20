@@ -34,12 +34,13 @@
             <table class="crm-table">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>SKU</th>
-                        <th>Category</th>
-                        <th>Price</th>
-                        <th>Tax %</th>
-                        <th>Status</th>
+                        <th>#</th>
+                        <th data-sort="name" data-dir="asc">Name</th>
+                        <th data-sort="sku" data-dir="asc">SKU</th>
+                        <th data-sort="category_id" data-dir="asc">Category</th>
+                        <th data-sort="price" data-dir="desc">Price</th>
+                        <th data-sort="tax_rate" data-dir="desc">Tax %</th>
+                        <th data-sort="is_active" data-dir="asc">Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -76,8 +77,14 @@
                         <div class="crm-field"><label class="crm-field-label">Price</label><input class="crm-input" type="number" step="0.01" name="price" min="0"></div>
                         <div class="crm-field"><label class="crm-field-label">Tax Rate %</label><input class="crm-input" type="number" step="0.01" name="tax_rate" min="0"></div>
                         <div class="crm-field"><label class="crm-field-label">HSN Code</label><input class="crm-input" name="hsn_code"></div>
+                        <div class="crm-field"><label class="crm-field-label">Capacity</label><input class="crm-input" name="capacity" placeholder="e.g. 100 ml to 5000 ml"></div>
                     </div>
                     <div class="crm-field"><label class="crm-field-label">Description</label><textarea class="crm-input" name="description" rows="2"></textarea></div>
+                    <div class="crm-field"><label class="crm-field-label">Operation</label><textarea class="crm-input" name="operation" rows="2"></textarea></div>
+                    <div class="crm-field"><label class="crm-field-label">Technical Specs (JSON)</label><textarea class="crm-input" name="technical_specifications" rows="3" placeholder='{"PLC":"Delta Make"}'></textarea></div>
+                    <div class="crm-field"><label class="crm-field-label">Input Specs (JSON)</label><textarea class="crm-input" name="input_specifications" rows="2"></textarea></div>
+                    <div class="crm-field"><label class="crm-field-label">Salient Features (JSON array)</label><textarea class="crm-input" name="salient_features" rows="2" placeholder='["No Bottle No Filling"]'></textarea></div>
+                    <div class="crm-field"><label class="crm-field-label">Utility Requirements (JSON)</label><textarea class="crm-input" name="utility_requirements" rows="2"></textarea></div>
                     <div class="crm-field" id="active-field" style="display:none;">
                         <label class="crm-checkbox"><input type="checkbox" name="is_active" value="1" checked> Active</label>
                     </div>
@@ -98,6 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('modal');
     const form = document.getElementById('product-form');
     const tbody = document.getElementById('table-body');
+    const tableSort = CrmTable.create({ sort_by: 'id', sort_dir: 'desc' });
     let currentPage = 1, editId = null;
     const canEdit = @json(auth()->user()->can('products.edit'));
     const canDelete = @json(auth()->user()->can('products.delete'));
@@ -108,7 +116,14 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('active-field').style.display = editId ? 'block' : 'none';
         form.reset();
         if (data) {
-            Object.keys(data).forEach(k => { if (form.elements[k]) form.elements[k].value = data[k] ?? ''; });
+            Object.keys(data).forEach(k => {
+                if (!form.elements[k]) return;
+                let val = data[k] ?? '';
+                if (['technical_specifications','input_specifications','salient_features','utility_requirements'].includes(k) && val && typeof val === 'object') {
+                    val = JSON.stringify(val, null, 2);
+                }
+                form.elements[k].value = val;
+            });
             if (data.category_id) form.elements.category_id.value = data.category_id;
             form.elements.is_active.checked = !!data.is_active;
         }
@@ -118,14 +133,16 @@ document.addEventListener('DOMContentLoaded', () => {
     function closeModal() { modal.style.display = 'none'; editId = null; }
 
     async function load(page = 1) {
-        const params = new URLSearchParams({
+        const params = new URLSearchParams(tableSort.params({
             page, search: document.getElementById('search').value,
             category_id: document.getElementById('category_id').value,
-        });
+        }));
         const res = await fetch(`{{ route('products.datatable') }}?${params}`, { headers: { 'Accept': 'application/json' } });
         const json = await res.json();
-        tbody.innerHTML = (json.data || []).map(row => `
+        const m = json.meta;
+        tbody.innerHTML = (json.data || []).map((row, i) => `
             <tr>
+                <td class="crm-sr">${tableSort.sr(m, i)}</td>
                 <td><strong>${row.name}</strong></td>
                 <td>${row.sku || '—'}</td>
                 <td>${row.category?.name || '—'}</td>
@@ -136,13 +153,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${canEdit ? `<button type="button" data-edit='${JSON.stringify(row).replace(/'/g,"&#39;")}'><i class="bi bi-pencil"></i></button>` : ''}
                     ${canDelete ? `<button type="button" data-delete="${row.id}"><i class="bi bi-trash"></i></button>` : ''}
                 </td>
-            </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--crm-muted);">No products found</td></tr>';
-        const m = json.meta;
+            </tr>`).join('') || '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--crm-muted);">No products found</td></tr>';
         document.getElementById('record-info').textContent = `Showing ${m.total ? (m.current_page-1)*m.per_page+1 : 0}-${Math.min(m.current_page*m.per_page,m.total)} of ${m.total} records`;
         document.getElementById('pagination').innerHTML = `<button ${m.current_page<=1?'disabled':''} data-page="${m.current_page-1}">&lsaquo;</button><span class="active">${m.current_page}</span><button ${m.current_page>=m.last_page?'disabled':''} data-page="${m.current_page+1}">&rsaquo;</button>`;
         currentPage = m.current_page;
     }
 
+    tableSort.bind(document.querySelector('.crm-table'), load);
     document.getElementById('add-btn')?.addEventListener('click', () => openModal('Add Product'));
     ['modal-close','modal-cancel'].forEach(id => document.getElementById(id).addEventListener('click', closeModal));
     document.getElementById('filter-btn').addEventListener('click', () => load(1));

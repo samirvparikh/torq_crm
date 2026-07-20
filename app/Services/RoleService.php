@@ -20,13 +20,16 @@ class RoleService
     {
         $query = Role::query()
             ->withCount(['permissions', 'users'])
-            ->with('permissions:id,name')
-            ->orderBy('name');
+            ->with('permissions:id,name');
 
         if (! empty($filters['search'])) {
             $search = $filters['search'];
             $query->where('name', 'like', "%{$search}%");
         }
+
+        \App\Support\DatatableSort::apply($query, $filters, [
+            'id', 'name', 'created_at',
+        ], 'name', 'asc');
 
         return $query->paginate($perPage);
     }
@@ -85,7 +88,7 @@ class RoleService
 
     public function delete(Role $role): bool
     {
-        if (in_array($role->name, [RoleName::SuperAdmin->value, RoleName::Admin->value], true)) {
+        if (in_array($role->name, RoleName::values(), true)) {
             throw new InvalidArgumentException('System roles cannot be deleted.');
         }
 

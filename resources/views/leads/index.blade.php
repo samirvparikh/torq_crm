@@ -51,12 +51,13 @@
             <table class="crm-table">
                 <thead>
                     <tr>
-                        <th>Lead #</th>
-                        <th>Customer</th>
-                        <th>Mobile</th>
-                        <th>Source</th>
-                        <th>Status</th>
-                        <th>Assigned</th>
+                        <th>#</th>
+                        <th data-sort="lead_number" data-dir="asc">Lead #</th>
+                        <th data-sort="customer_name" data-dir="asc">Customer</th>
+                        <th data-sort="mobile" data-dir="asc">Mobile</th>
+                        <th data-sort="lead_source_id" data-dir="asc">Source</th>
+                        <th data-sort="status" data-dir="asc">Status</th>
+                        <th data-sort="assigned_to" data-dir="asc">Assigned</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -77,6 +78,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const tbody = document.getElementById('leads-table-body');
     const pagination = document.getElementById('leads-pagination');
     const recordInfo = document.getElementById('leads-record-info');
+    const tableEl = document.querySelector('.crm-table');
+    const tableSort = CrmTable.create({ sort_by: 'id', sort_dir: 'desc' });
     let currentPage = 1;
 
     const statusBadge = (status) => {
@@ -86,20 +89,22 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     async function loadLeads(page = 1) {
-        const params = new URLSearchParams({
+        const params = new URLSearchParams(tableSort.params({
             page,
             search: document.getElementById('lead-search').value,
             status: document.getElementById('lead-status').value,
             lead_source_id: document.getElementById('lead-source').value,
-        });
+        }));
 
         const response = await fetch(`{{ route('leads.datatable') }}?${params}`, {
             headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
         });
         const json = await response.json();
+        const meta = json.meta;
 
-        tbody.innerHTML = (json.data || []).map(lead => `
+        tbody.innerHTML = (json.data || []).map((lead, i) => `
             <tr>
+                <td class="crm-sr">${tableSort.sr(meta, i)}</td>
                 <td><strong>${lead.lead_number}</strong></td>
                 <td>${lead.customer_name}</td>
                 <td>${lead.mobile || '-'}</td>
@@ -108,9 +113,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${lead.assignee?.name || '-'}</td>
                 <td><a href="{{ url('leads') }}/${lead.id}" class="crm-link"><i class="bi bi-three-dots"></i></a></td>
             </tr>
-        `).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--crm-muted);padding:32px;">No leads found</td></tr>';
+        `).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--crm-muted);padding:32px;">No leads found</td></tr>';
 
-        const meta = json.meta;
         const from = meta.total ? ((meta.current_page - 1) * meta.per_page + 1) : 0;
         const to = Math.min(meta.current_page * meta.per_page, meta.total);
         recordInfo.textContent = `Showing ${from}-${to} of ${meta.total} records`;
@@ -123,6 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentPage = meta.current_page;
     }
 
+    tableSort.bind(tableEl, loadLeads);
     document.getElementById('lead-filter-btn').addEventListener('click', () => loadLeads(1));
     document.getElementById('lead-refresh-btn').addEventListener('click', () => loadLeads(currentPage));
     document.getElementById('lead-sync-btn')?.addEventListener('click', async () => {
@@ -140,10 +145,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
             });
             const json = await res.json();
-            alert(json.message || (json.success ? 'Sync complete.' : 'Sync failed.'));
-            if (json.success) loadLeads(1);
+            if (json.success) {
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Sync Successful',
+                    text: json.message || 'Leads synced successfully.',
+                    confirmButtonColor: '#2563eb',
+                });
+                loadLeads(1);
+            } else {
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Sync Failed',
+                    text: json.message || 'Sync failed.',
+                    confirmButtonColor: '#dc2626',
+                });
+            }
         } catch (err) {
-            alert('Sync failed. Please try again.');
+            await Swal.fire({
+                icon: 'error',
+                title: 'Sync Failed',
+                text: 'Sync failed. Please try again.',
+                confirmButtonColor: '#dc2626',
+            });
         } finally {
             btn.disabled = false;
             btn.innerHTML = original;

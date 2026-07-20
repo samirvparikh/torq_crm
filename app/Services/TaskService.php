@@ -43,8 +43,7 @@ class TaskService
     public function list(array $filters = [], int $perPage = 25): LengthAwarePaginator
     {
         $query = Task::query()
-            ->with(['lead', 'assignee'])
-            ->latest('id');
+            ->with(['lead', 'assignee']);
 
         if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
@@ -58,6 +57,10 @@ class TaskService
             $search = $filters['search'];
             $query->where('title', 'like', "%{$search}%");
         }
+
+        \App\Support\DatatableSort::apply($query, $filters, [
+            'id', 'title', 'assigned_to', 'priority', 'status', 'due_date', 'created_at',
+        ], 'id', 'desc');
 
         return $query->paginate($perPage);
     }

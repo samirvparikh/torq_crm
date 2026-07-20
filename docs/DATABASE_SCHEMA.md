@@ -1,4 +1,4 @@
-# LeadCRM — Database Schema
+# TorqCRM — Database Schema
 
 Complete normalized schema for the IndiaMART Lead Management CRM.
 

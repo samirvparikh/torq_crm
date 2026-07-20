@@ -11,7 +11,7 @@ class SettingSeeder extends Seeder
     {
         $settings = [
             // Company Profile
-            ['group' => 'company', 'key' => 'name', 'value' => 'LeadCRM', 'type' => 'string'],
+            ['group' => 'company', 'key' => 'name', 'value' => 'Torq CRM', 'type' => 'string'],
             ['group' => 'company', 'key' => 'email', 'value' => 'info@gmail.com', 'type' => 'string'],
             ['group' => 'company', 'key' => 'phone', 'value' => '', 'type' => 'string'],
             ['group' => 'company', 'key' => 'address', 'value' => '', 'type' => 'text'],
@@ -25,7 +25,7 @@ class SettingSeeder extends Seeder
             ['group' => 'smtp', 'key' => 'password', 'value' => '', 'type' => 'string', 'is_encrypted' => true],
             ['group' => 'smtp', 'key' => 'encryption', 'value' => 'tls', 'type' => 'string'],
             ['group' => 'smtp', 'key' => 'from_address', 'value' => '', 'type' => 'string'],
-            ['group' => 'smtp', 'key' => 'from_name', 'value' => 'LeadCRM', 'type' => 'string'],
+            ['group' => 'smtp', 'key' => 'from_name', 'value' => 'Torq CRM', 'type' => 'string'],
 
             // SMS Gateway
             ['group' => 'sms', 'key' => 'provider', 'value' => '', 'type' => 'string'],

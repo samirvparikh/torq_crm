@@ -31,7 +31,7 @@ class RoleController extends Controller
         abort_unless(auth()->user()->can('roles.view'), 403);
 
         $roles = $this->roleService->list(
-            $request->only(['search']),
+            $request->only(['search', 'sort_by', 'sort_dir']),
             (int) $request->input('per_page', 25)
         );
 

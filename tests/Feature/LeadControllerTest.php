@@ -41,16 +41,17 @@ class LeadControllerTest extends TestCase
         ]);
     }
 
-    public function test_viewer_cannot_create_lead(): void
+    public function test_marketing_can_create_lead(): void
     {
         $user = User::factory()->create();
-        $user->assignRole(RoleName::Viewer->value);
+        $user->assignRole(RoleName::Marketing->value);
 
         $response = $this->actingAs($user)->postJson(route('leads.store'), [
             'customer_name' => 'John Doe',
+            'mobile' => '9123456789',
         ]);
 
-        $response->assertForbidden();
+        $response->assertCreated()->assertJsonPath('success', true);
     }
 
     public function test_lead_datatable_returns_paginated_json(): void
@@ -67,10 +68,10 @@ class LeadControllerTest extends TestCase
             ->assertJsonStructure(['data', 'meta' => ['total', 'current_page']]);
     }
 
-    public function test_sales_executive_sees_only_assigned_leads_in_datatable(): void
+    public function test_manager_sees_all_leads_in_datatable(): void
     {
         $user = User::factory()->create();
-        $user->assignRole(RoleName::SalesExecutive->value);
+        $user->assignRole(RoleName::Manager->value);
 
         Lead::factory()->create(['assigned_to' => $user->id, 'customer_name' => 'Mine']);
         Lead::factory()->create(['customer_name' => 'Others']);
@@ -78,7 +79,6 @@ class LeadControllerTest extends TestCase
         $response = $this->actingAs($user)->getJson(route('leads.datatable'));
 
         $response->assertOk();
-        $this->assertCount(1, $response->json('data'));
-        $this->assertEquals('Mine', $response->json('data.0.customer_name'));
+        $this->assertCount(2, $response->json('data'));
     }
 }

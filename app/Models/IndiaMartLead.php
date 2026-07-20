@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class IndiaMartLead extends Model
 {
-    protected $table = 'inidamart_leads';
+    protected $table = 'indiamart_leads';
 
     public $timestamps = false;
 

@@ -16,8 +16,7 @@ class UserService
     public function list(array $filters = [], int $perPage = 25): LengthAwarePaginator
     {
         $query = User::query()
-            ->with('roles')
-            ->latest('id');
+            ->with('roles');
 
         if (! empty($filters['search'])) {
             $search = $filters['search'];
@@ -36,6 +35,10 @@ class UserService
         if (! empty($filters['role'])) {
             $query->role($filters['role']);
         }
+
+        \App\Support\DatatableSort::apply($query, $filters, [
+            'id', 'name', 'email', 'phone', 'is_active', 'created_at',
+        ], 'id', 'desc');
 
         return $query->paginate($perPage);
     }

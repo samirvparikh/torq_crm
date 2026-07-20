@@ -36,7 +36,7 @@ class CompanyService
      */
     public function list(array $filters = [], int $perPage = 25): LengthAwarePaginator
     {
-        $query = Company::query()->latest('id');
+        $query = Company::query();
 
         if (! empty($filters['search'])) {
             $search = $filters['search'];
@@ -47,6 +47,10 @@ class CompanyService
                     ->orWhere('gst_number', 'like', "%{$search}%");
             });
         }
+
+        \App\Support\DatatableSort::apply($query, $filters, [
+            'id', 'name', 'phone', 'email', 'gst_number', 'city', 'state', 'is_active', 'created_at',
+        ], 'id', 'desc');
 
         return $query->paginate($perPage);
     }

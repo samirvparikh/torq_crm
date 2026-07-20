@@ -58,8 +58,7 @@ class CustomerService
     public function list(array $filters = [], int $perPage = 25): LengthAwarePaginator
     {
         $query = Customer::query()
-            ->with(['company'])
-            ->latest('id');
+            ->with(['company']);
 
         if (! empty($filters['search'])) {
             $search = $filters['search'];
@@ -74,6 +73,10 @@ class CustomerService
         if (isset($filters['is_active'])) {
             $query->where('is_active', (bool) $filters['is_active']);
         }
+
+        \App\Support\DatatableSort::apply($query, $filters, [
+            'id', 'name', 'mobile', 'email', 'company_id', 'is_active', 'created_at',
+        ], 'id', 'desc');
 
         return $query->paginate($perPage);
     }

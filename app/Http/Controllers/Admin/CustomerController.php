@@ -31,7 +31,7 @@ class CustomerController extends Controller
         $this->authorize('viewAny', Customer::class);
 
         $customers = $this->customerService->list(
-            $request->only(['search', 'is_active']),
+            $request->only(['search', 'is_active', 'sort_by', 'sort_dir']),
             (int) $request->input('per_page', 25)
         );
 

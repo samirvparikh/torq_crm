@@ -30,9 +30,9 @@ class TaskController extends Controller
     {
         $this->authorize('viewAny', Task::class);
 
-        $filters = $request->only(['search', 'status']);
+        $filters = $request->only(['search', 'status', 'sort_by', 'sort_dir']);
 
-        if (! $request->user()->hasAnyRole(['Super Admin', 'Admin', 'Sales Manager'])) {
+        if (! $request->user()->seesUnrestrictedRecords()) {
             $filters['assigned_to'] = $request->user()->id;
         }
 

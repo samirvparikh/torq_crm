@@ -34,11 +34,12 @@
             <table class="crm-table">
                 <thead>
                     <tr>
-                        <th>Title</th>
-                        <th>Assigned To</th>
-                        <th>Priority</th>
-                        <th>Status</th>
-                        <th>Due Date</th>
+                        <th>#</th>
+                        <th data-sort="title" data-dir="asc">Title</th>
+                        <th data-sort="assigned_to" data-dir="asc">Assigned To</th>
+                        <th data-sort="priority" data-dir="asc">Priority</th>
+                        <th data-sort="status" data-dir="asc">Status</th>
+                        <th data-sort="due_date" data-dir="desc">Due Date</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -115,6 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('modal');
     const form = document.getElementById('task-form');
     const tbody = document.getElementById('table-body');
+    const tableSort = CrmTable.create({ sort_by: 'id', sort_dir: 'desc' });
     let currentPage = 1, editId = null;
     const canEdit = @json(auth()->user()->can('tasks.edit'));
     const canDelete = @json(auth()->user()->can('tasks.delete'));
@@ -138,13 +140,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function closeModal() { modal.style.display = 'none'; editId = null; }
 
     async function load(page = 1) {
-        const params = new URLSearchParams({ page, search: document.getElementById('search').value, status: document.getElementById('status').value });
+        const params = new URLSearchParams(tableSort.params({ page, search: document.getElementById('search').value, status: document.getElementById('status').value }));
         const res = await fetch(`{{ route('tasks.datatable') }}?${params}`, { headers: { 'Accept': 'application/json' } });
         const json = await res.json();
-        tbody.innerHTML = (json.data || []).map(row => {
+        const m = json.meta;
+        tbody.innerHTML = (json.data || []).map((row, i) => {
             const st = row.status?.value || row.status || 'Pending';
             const pr = row.priority?.value || row.priority || 'Medium';
             return `<tr>
+                <td class="crm-sr">${tableSort.sr(m, i)}</td>
                 <td><strong>${row.title}</strong></td>
                 <td>${row.assignee?.name || '—'}</td>
                 <td><span class="crm-badge crm-badge-secondary">${pr}</span></td>
@@ -155,13 +159,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${canDelete ? `<button type="button" data-delete="${row.id}"><i class="bi bi-trash"></i></button>` : ''}
                 </td>
             </tr>`;
-        }).join('') || '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--crm-muted);">No tasks found</td></tr>';
-        const m = json.meta;
+        }).join('') || '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--crm-muted);">No tasks found</td></tr>';
         document.getElementById('record-info').textContent = `Showing ${m.total ? (m.current_page-1)*m.per_page+1 : 0}-${Math.min(m.current_page*m.per_page,m.total)} of ${m.total} records`;
         document.getElementById('pagination').innerHTML = `<button ${m.current_page<=1?'disabled':''} data-page="${m.current_page-1}">&lsaquo;</button><span class="active">${m.current_page}</span><button ${m.current_page>=m.last_page?'disabled':''} data-page="${m.current_page+1}">&rsaquo;</button>`;
         currentPage = m.current_page;
     }
 
+    tableSort.bind(document.querySelector('.crm-table'), load);
     document.getElementById('add-btn')?.addEventListener('click', () => openModal('Add Task'));
     ['modal-close','modal-cancel'].forEach(id => document.getElementById(id).addEventListener('click', closeModal));
     document.getElementById('filter-btn').addEventListener('click', () => load(1));

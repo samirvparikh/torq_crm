@@ -47,7 +47,7 @@ class LeadPolicy
 
     protected function canAccessLead(User $user, Lead $lead): bool
     {
-        if ($user->hasAnyRole(['Super Admin', 'Admin', 'Sales Manager', 'Marketing', 'Viewer'])) {
+        if ($user->seesUnrestrictedRecords() || $user->hasRole(\App\Enums\RoleName::Marketing->value)) {
             return true;
         }
 
@@ -57,7 +57,7 @@ class LeadPolicy
 
     protected function canModifyLead(User $user, Lead $lead): bool
     {
-        if ($user->hasAnyRole(['Super Admin', 'Admin', 'Sales Manager'])) {
+        if ($user->seesUnrestrictedRecords()) {
             return true;
         }
 

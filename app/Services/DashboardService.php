@@ -19,7 +19,7 @@ class DashboardService
 
         if ($user && ! $user->can('leads.view') && $user->can('dashboard.view')) {
             $query->where('assigned_to', $user->id);
-        } elseif ($user && ! $user->hasAnyRole(['Super Admin', 'Admin', 'Sales Manager'])) {
+        } elseif ($user && ! $user->seesUnrestrictedRecords()) {
             $query->where('assigned_to', $user->id);
         }
 
@@ -297,7 +297,7 @@ class DashboardService
 
         if ($user && ! $user->can('leads.view') && $user->can('dashboard.view')) {
             $query->where('assigned_to', $user->id);
-        } elseif ($user && ! $user->hasAnyRole(['Super Admin', 'Admin', 'Sales Manager'])) {
+        } elseif ($user && ! $user->seesUnrestrictedRecords()) {
             $query->where('assigned_to', $user->id);
         }
 

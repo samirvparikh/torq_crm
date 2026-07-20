@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\CompanySettingController;
 use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -7,6 +8,7 @@ use App\Http\Controllers\Admin\LeadController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\QuotationController;
+use App\Http\Controllers\Admin\QuotationTermTemplateController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\TaskController;
 use App\Http\Controllers\Admin\UserController;
@@ -71,8 +73,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('quotations')->name('quotations.')->middleware('permission:quotations.view')->group(function () {
         Route::get('/', [QuotationController::class, 'index'])->name('index');
         Route::get('/datatable', [QuotationController::class, 'datatable'])->name('datatable');
+        Route::get('/create', [QuotationController::class, 'create'])->middleware('permission:quotations.create')->name('create');
         Route::post('/', [QuotationController::class, 'store'])->middleware('permission:quotations.create')->name('store');
+        Route::get('/{quotation}', [QuotationController::class, 'show'])->name('show');
+        Route::put('/{quotation}', [QuotationController::class, 'update'])->middleware('permission:quotations.edit')->name('update');
+        Route::patch('/{quotation}/section', [QuotationController::class, 'updateSection'])->middleware('permission:quotations.edit')->name('section');
+        Route::get('/{quotation}/pdf', [QuotationController::class, 'pdf'])->name('pdf');
+        Route::get('/{quotation}/preview', [QuotationController::class, 'preview'])->name('preview');
         Route::delete('/{quotation}', [QuotationController::class, 'destroy'])->middleware('permission:quotations.delete')->name('destroy');
+    });
+
+    Route::prefix('quotation-terms')->name('quotation-terms.')->middleware('permission:quotations.view')->group(function () {
+        Route::get('/', [QuotationTermTemplateController::class, 'index'])->name('index');
+        Route::post('/', [QuotationTermTemplateController::class, 'store'])->name('store');
+        Route::put('/{quotationTerm}', [QuotationTermTemplateController::class, 'update'])->name('update');
+        Route::delete('/{quotationTerm}', [QuotationTermTemplateController::class, 'destroy'])->name('destroy');
     });
 
     Route::prefix('tasks')->name('tasks.')->middleware('permission:tasks.view')->group(function () {
@@ -103,6 +118,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', [PermissionController::class, 'index'])->name('index');
         Route::get('/datatable', [PermissionController::class, 'datatable'])->name('datatable');
         Route::post('/sync', [PermissionController::class, 'sync'])->middleware('permission:permissions.edit')->name('sync');
+    });
+
+    Route::prefix('settings')->name('settings.')->group(function () {
+        Route::get('/company', [CompanySettingController::class, 'edit'])
+            ->middleware('permission:settings.view')
+            ->name('company.edit');
+        Route::get('/company/logo', [CompanySettingController::class, 'logo'])
+            ->middleware('permission:settings.view')
+            ->name('company.logo');
+        Route::put('/company', [CompanySettingController::class, 'update'])
+            ->middleware('permission:settings.edit')
+            ->name('company.update');
     });
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

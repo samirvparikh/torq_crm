@@ -27,17 +27,31 @@ class RolePermissionTest extends TestCase
         $this->assertTrue($user->can('dashboard.view'));
         $this->assertTrue($user->can('indiamart.sync'));
         $this->assertTrue($user->can('roles.delete'));
+        $this->assertTrue($user->canAccessAdministration());
     }
 
-    public function test_viewer_has_read_only_permissions(): void
+    public function test_manager_cannot_access_administration(): void
     {
         $user = User::factory()->create();
-        $user->assignRole(RoleName::Viewer->value);
+        $user->assignRole(RoleName::Manager->value);
+
+        $this->assertTrue($user->can('dashboard.view'));
+        $this->assertTrue($user->can('leads.create'));
+        $this->assertFalse($user->can('users.view'));
+        $this->assertFalse($user->can('settings.view'));
+        $this->assertFalse($user->canAccessAdministration());
+    }
+
+    public function test_marketing_cannot_access_administration(): void
+    {
+        $user = User::factory()->create();
+        $user->assignRole(RoleName::Marketing->value);
 
         $this->assertTrue($user->can('dashboard.view'));
         $this->assertTrue($user->can('leads.view'));
-        $this->assertFalse($user->can('leads.create'));
-        $this->assertFalse($user->can('leads.delete'));
+        $this->assertFalse($user->can('users.view'));
+        $this->assertFalse($user->can('roles.view'));
+        $this->assertFalse($user->canAccessAdministration());
     }
 
     public function test_inactive_user_cannot_login(): void
@@ -45,7 +59,7 @@ class RolePermissionTest extends TestCase
         $user = User::factory()->inactive()->create([
             'email' => 'inactive@gmail.com',
         ]);
-        $user->assignRole(RoleName::Viewer->value);
+        $user->assignRole(RoleName::Marketing->value);
 
         $response = $this->post('/login', [
             'email' => 'inactive@gmail.com',
@@ -59,7 +73,7 @@ class RolePermissionTest extends TestCase
     public function test_dashboard_requires_permission(): void
     {
         $user = User::factory()->create();
-        $user->assignRole(RoleName::Viewer->value);
+        $user->assignRole(RoleName::Marketing->value);
 
         $this->actingAs($user)
             ->get('/dashboard')

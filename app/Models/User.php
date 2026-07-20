@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\RoleName;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -52,7 +53,17 @@ class User extends Authenticatable
 
     public function isSuperAdmin(): bool
     {
-        return $this->hasRole('Super Admin');
+        return $this->hasRole(RoleName::SuperAdmin->value);
+    }
+
+    public function canAccessAdministration(): bool
+    {
+        return $this->hasAnyRole(RoleName::administration());
+    }
+
+    public function seesUnrestrictedRecords(): bool
+    {
+        return $this->hasAnyRole(RoleName::unrestricted());
     }
 
     public function primaryRoleName(): ?string

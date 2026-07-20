@@ -8,38 +8,6 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Source table from the IndiaMART Message Centre bot (legacy spelling: inidamart_leads)
-        if (! Schema::hasTable('inidamart_leads')) {
-            Schema::create('inidamart_leads', function (Blueprint $table) {
-                $table->id();
-                $table->string('unique_query_id', 50)->unique();
-                $table->string('query_type', 10)->nullable();
-                $table->dateTime('query_time')->nullable();
-                $table->string('sender_name', 200)->nullable();
-                $table->string('sender_mobile', 30)->nullable();
-                $table->string('sender_email', 150)->nullable();
-                $table->string('sender_company', 200)->nullable();
-                $table->text('sender_address')->nullable();
-                $table->string('sender_city', 100)->nullable();
-                $table->string('sender_state', 100)->nullable();
-                $table->string('sender_pincode', 20)->nullable();
-                $table->string('sender_country_iso', 10)->nullable();
-                $table->string('sender_mobile_alt', 30)->nullable();
-                $table->string('sender_email_alt', 150)->nullable();
-                $table->string('query_product_name', 255)->nullable();
-                $table->text('query_message')->nullable();
-                $table->string('query_mcat_name', 255)->nullable();
-                $table->string('call_duration', 50)->nullable();
-                $table->string('receiver_mobile', 30)->nullable();
-                $table->timestamp('created_at')->useCurrent();
-
-                $table->index('query_time');
-                $table->index('sender_mobile');
-                $table->index('sender_city');
-                $table->index('created_at');
-            });
-        }
-
         Schema::table('leads', function (Blueprint $table) {
             if (! Schema::hasColumn('leads', 'query_type')) {
                 $table->string('query_type', 10)->nullable()->after('indiamart_lead_id');
@@ -68,7 +36,5 @@ return new class extends Migration
                 }
             }
         });
-
-        // Do not drop inidamart_leads — owned by the sync bot as well
     }
 };

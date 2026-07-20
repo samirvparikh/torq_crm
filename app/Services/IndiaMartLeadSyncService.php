@@ -20,7 +20,7 @@ class IndiaMartLeadSyncService
     ) {}
 
     /**
-     * Copy new rows from inidamart_leads into leads.
+     * Copy new rows from indiamart_leads into leads.
      *
      * @return array{inserted:int, skipped:int, total:int}
      */

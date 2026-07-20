@@ -44,9 +44,10 @@ class LeadController extends Controller
         $filters = $request->only([
             'search', 'lead_source_id', 'status', 'priority',
             'assigned_to', 'state', 'city', 'date_from', 'date_to',
+            'sort_by', 'sort_dir',
         ]);
 
-        if (! $request->user()->hasAnyRole(['Super Admin', 'Admin', 'Sales Manager'])) {
+        if (! $request->user()->seesUnrestrictedRecords()) {
             $filters['assigned_only'] = true;
             $filters['user_id'] = $request->user()->id;
         }

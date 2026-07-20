@@ -27,39 +27,18 @@ class AdminUserSeeder extends Seeder
                 'role' => RoleName::Admin->value,
             ],
             [
-                'name' => 'Sales Manager',
+                'name' => 'Manager User',
                 'email' => 'manager@gmail.com',
                 'phone' => '9999999993',
-                'designation' => 'Sales Manager',
-                'role' => RoleName::SalesManager->value,
-            ],
-            [
-                'name' => 'Sales Executive',
-                'email' => 'executive@gmail.com',
-                'phone' => '9999999994',
-                'designation' => 'Sales Executive',
-                'role' => RoleName::SalesExecutive->value,
-            ],
-            [
-                'name' => 'Tele Caller',
-                'email' => 'telecaller@gmail.com',
-                'phone' => '9999999995',
-                'designation' => 'Tele Caller',
-                'role' => RoleName::TeleCaller->value,
+                'designation' => 'Manager',
+                'role' => RoleName::Manager->value,
             ],
             [
                 'name' => 'Marketing User',
                 'email' => 'marketing@gmail.com',
                 'phone' => '9999999996',
-                'designation' => 'Marketing Executive',
+                'designation' => 'Marketing',
                 'role' => RoleName::Marketing->value,
-            ],
-            [
-                'name' => 'Viewer User',
-                'email' => 'viewer@gmail.com',
-                'phone' => '9999999997',
-                'designation' => 'Viewer',
-                'role' => RoleName::Viewer->value,
             ],
         ];
 
@@ -71,7 +50,7 @@ class AdminUserSeeder extends Seeder
                 ['email' => $data['email']],
                 [
                     ...$data,
-                    'password' => Hash::make('password'),
+                    'password' => Hash::make('123456'),
                     'email_verified_at' => now(),
                     'is_active' => true,
                 ]
@@ -80,6 +59,6 @@ class AdminUserSeeder extends Seeder
             $user->syncRoles([$role]);
         }
 
-        $this->command?->info('Default users seeded. Password for all: password');
+        $this->command?->info('Default users seeded. Password for all: 123456');
     }
 }
