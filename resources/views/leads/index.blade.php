@@ -31,6 +31,8 @@
         <div class="crm-content-card-body">
             <div class="crm-filters">
                 <input type="text" id="lead-search" class="crm-input" placeholder="Search leads...">
+                <input type="date" id="lead-date-from" class="crm-input" value="{{ now()->toDateString() }}" title="From date">
+                <input type="date" id="lead-date-to" class="crm-input" value="{{ now()->toDateString() }}" title="To date">
                 <select id="lead-status" class="crm-input">
                     <option value="">All Status</option>
                     @foreach (App\Enums\LeadStatus::cases() as $status)
@@ -92,6 +94,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const params = new URLSearchParams(tableSort.params({
             page,
             search: document.getElementById('lead-search').value,
+            date_from: document.getElementById('lead-date-from').value,
+            date_to: document.getElementById('lead-date-to').value,
             status: document.getElementById('lead-status').value,
             lead_source_id: document.getElementById('lead-source').value,
         }));
@@ -111,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${lead.lead_source?.name || '-'}</td>
                 <td>${statusBadge(lead.status)}</td>
                 <td>${lead.assignee?.name || '-'}</td>
-                <td><a href="{{ url('leads') }}/${lead.id}" class="crm-link"><i class="bi bi-three-dots"></i></a></td>
+                <td><a href="{{ url('leads') }}/${lead.id}" class="crm-link" title="View"><i class="bi bi-eye"></i></a></td>
             </tr>
         `).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--crm-muted);padding:32px;">No leads found</td></tr>';
 

@@ -1506,13 +1506,17 @@ body.sidebar-collapsed .crm-nav-link i {
     flex-shrink: 0;
 }
 
-.crm-action-menu {
-    display: inline-flex;
-    gap: 6px;
+.crm-table td.crm-action-menu {
+    white-space: nowrap;
+    width: 1%;
+    vertical-align: middle;
 }
 
 .crm-action-menu button,
 .crm-action-menu a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     background: none;
     border: none;
     color: var(--crm-primary);
@@ -1520,6 +1524,12 @@ body.sidebar-collapsed .crm-nav-link i {
     font-size: var(--crm-text-base);
     padding: 4px;
     text-decoration: none;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+.crm-action-menu button:last-child,
+.crm-action-menu a:last-child {
+    margin-right: 0;
 }
 
 .crm-line-items-table {

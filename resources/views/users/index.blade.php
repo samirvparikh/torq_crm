@@ -149,10 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${row.phone || '—'}</td>
                 <td>${roleLabel}</td>
                 <td><span class="crm-badge crm-badge-${row.is_active ? 'success' : 'secondary'}">${row.is_active ? 'Active' : 'Inactive'}</span></td>
-                <td class="crm-action-menu">
-                    ${canEdit ? `<button type="button" data-edit='${JSON.stringify(row).replace(/'/g,"&#39;")}'><i class="bi bi-pencil"></i></button>` : ''}
-                    ${showDelete ? `<button type="button" data-delete="${row.id}"><i class="bi bi-trash"></i></button>` : ''}
-                </td>
+                <td class="crm-action-menu">${canEdit ? `<button type="button" data-edit='${JSON.stringify(row).replace(/'/g,"&#39;")}' title="Edit"><i class="bi bi-pencil"></i></button>` : ''}${showDelete ? `<button type="button" data-delete="${row.id}" title="Delete"><i class="bi bi-trash"></i></button>` : ''}</td>
             </tr>`;
         }).join('') || '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--crm-muted);">No users found</td></tr>';
         document.getElementById('record-info').textContent = `Showing ${m.total ? (m.current_page-1)*m.per_page+1 : 0}-${Math.min(m.current_page*m.per_page,m.total)} of ${m.total} records`;
