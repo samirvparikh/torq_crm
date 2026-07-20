@@ -13,8 +13,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class QuotationController extends Controller
 {
@@ -191,7 +189,7 @@ class QuotationController extends Controller
         ]);
     }
 
-    public function pdf(Quotation $quotation): Response|StreamedResponse|BinaryFileResponse
+    public function pdf(Quotation $quotation): Response
     {
         $this->authorize('view', $quotation);
 

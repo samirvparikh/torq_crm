@@ -55,21 +55,42 @@ class QuotationPdfService
 
     public function render(Quotation $quotation)
     {
-        return Pdf::loadView('quotations.pdf', $this->documentViewData($quotation))->setPaper('a4');
+        $pdf = Pdf::loadView('quotations.pdf', $this->documentViewData($quotation))->setPaper('a4');
+        $dompdf = $pdf->getDomPDF();
+        $dompdf->render();
+
+        $canvas = $dompdf->getCanvas();
+        $fontMetrics = $dompdf->getFontMetrics();
+        $font = $fontMetrics->getFont('DejaVu Sans');
+        $size = 9;
+        $sample = 'Page 0 of 0';
+        $width = $fontMetrics->getTextWidth($sample, $font, $size);
+        $x = ($canvas->get_width() - $width) / 2;
+        $y = $canvas->get_height() - 28;
+
+        $canvas->page_text($x, $y, 'Page {PAGE_NUM} of {PAGE_COUNT}', $font, $size, [0.4, 0.4, 0.4]);
+
+        return $dompdf;
     }
 
     public function download(Quotation $quotation)
     {
         $filename = ($quotation->quotation_number ?: 'quotation').'.pdf';
 
-        return $this->render($quotation)->download($filename);
+        return response($this->render($quotation)->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ]);
     }
 
     public function stream(Quotation $quotation)
     {
         $filename = ($quotation->quotation_number ?: 'quotation').'.pdf';
 
-        return $this->render($quotation)->stream($filename);
+        return response($this->render($quotation)->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="'.$filename.'"',
+        ]);
     }
 
     public function store(Quotation $quotation): string

@@ -1,8 +1,27 @@
 @php $context = $context ?? 'pdf'; @endphp
 @if ($context === 'pdf')
 <style>
-    @page { margin: 28px 32px; }
+    @page { margin: 125px 32px 42px 32px; }
     body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #111; line-height: 1.45; }
+    .page-header {
+        position: fixed;
+        top: -112px;
+        left: 0;
+        right: 0;
+        height: 100px;
+        border-bottom: 2px solid #1b3c6a;
+        padding-bottom: 8px;
+    }
+    .page-footer {
+        position: fixed;
+        bottom: -28px;
+        left: 0;
+        right: 0;
+        height: 20px;
+        text-align: center;
+        font-size: 9px;
+        color: #666;
+    }
 @else
 <style>
     .quotation-document {
@@ -90,11 +109,12 @@
     .quotation-preview-shell {
         background: #525659;
         margin: 0 -24px;
-        padding: 24px 16px 32px;
+        padding: 16px;
+        min-height: calc(100vh - 160px);
     }
     .quotation-preview-meta {
-        max-width: 210mm;
-        margin: 0 auto 14px;
+        max-width: 920px;
+        margin: 0 auto 12px;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -103,39 +123,16 @@
         color: #e8eaed;
         font-size: 12px;
     }
-    .quotation-preview-meta .crm-badge {
-        font-size: 11px;
-    }
-    .quotation-pages {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 20px;
-    }
-    .quotation-doc-page {
-        width: 210mm;
-        min-height: 297mm;
+    .quotation-pdf-frame {
+        display: block;
+        width: 100%;
+        max-width: 920px;
+        height: calc(100vh - 210px);
+        min-height: 720px;
+        margin: 0 auto;
+        border: 0;
         background: #fff;
         box-shadow: 0 4px 18px rgba(0, 0, 0, 0.28);
-        box-sizing: border-box;
-        padding: 28px 32px;
-        position: relative;
-    }
-    .quotation-doc-page::after {
-        content: attr(data-page);
-        position: absolute;
-        bottom: 10px;
-        right: 16px;
-        font-size: 10px;
-        color: #888;
-    }
-    .quotation-doc-source {
-        position: absolute;
-        left: -9999px;
-        top: 0;
-        width: 210mm;
-        visibility: hidden;
-        pointer-events: none;
     }
 @endif
 </style>

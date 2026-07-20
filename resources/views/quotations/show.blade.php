@@ -12,17 +12,19 @@
     <div class="crm-toolbar-actions">
         @php $canEdit = auth()->user()->can('update', $quotation); @endphp
         @if ($canEdit)
-            <div style="position:relative;">
-                <button type="button" class="crm-btn" id="edit-menu-btn"><i class="bi bi-pencil"></i> Edit</button>
-                <div id="edit-menu" style="display:none;position:absolute;right:0;top:calc(100% + 6px);z-index:30;min-width:220px;background:#fff;border:1px solid var(--crm-border);border-radius:var(--crm-radius);box-shadow:var(--crm-shadow);padding:6px 0;">
-                    <button type="button" class="crm-section-edit" data-section="details" style="display:block;width:100%;text-align:left;padding:8px 14px;border:none;background:none;cursor:pointer;font-size:13px;">Quotation Details</button>
-                    <button type="button" class="crm-section-edit" data-section="subject" style="display:block;width:100%;text-align:left;padding:8px 14px;border:none;background:none;cursor:pointer;font-size:13px;">Subject &amp; Intro</button>
+            <div class="crm-edit-dropdown" id="edit-dropdown">
+                <button type="button" class="crm-btn" id="edit-menu-btn" aria-haspopup="true" aria-expanded="false">
+                    <i class="bi bi-pencil"></i> Edit <i class="bi bi-chevron-down" style="font-size:11px;margin-left:2px;"></i>
+                </button>
+                <div id="edit-menu" class="crm-edit-dropdown-menu" hidden>
+                    <button type="button" class="crm-edit-dropdown-item crm-section-edit" data-section="details">Quotation Details</button>
+                    <button type="button" class="crm-edit-dropdown-item crm-section-edit" data-section="subject">Subject &amp; Intro</button>
                     @foreach ($quotation->items as $item)
-                        <button type="button" class="crm-section-edit" data-section="item" data-item-id="{{ $item->id }}" style="display:block;width:100%;text-align:left;padding:8px 14px;border:none;background:none;cursor:pointer;font-size:13px;">{{ $item->product_name }}</button>
+                        <button type="button" class="crm-edit-dropdown-item crm-section-edit" data-section="item" data-item-id="{{ $item->id }}" title="{{ $item->product_name }}">{{ $item->product_name }}</button>
                     @endforeach
-                    <button type="button" class="crm-section-edit" data-section="items" style="display:block;width:100%;text-align:left;padding:8px 14px;border:none;background:none;cursor:pointer;font-size:13px;">Price Breakup</button>
-                    <button type="button" class="crm-section-edit" data-section="terms" style="display:block;width:100%;text-align:left;padding:8px 14px;border:none;background:none;cursor:pointer;font-size:13px;">Terms &amp; Conditions</button>
-                    <button type="button" class="crm-section-edit" data-section="notes" style="display:block;width:100%;text-align:left;padding:8px 14px;border:none;background:none;cursor:pointer;font-size:13px;">Notes</button>
+                    <button type="button" class="crm-edit-dropdown-item crm-section-edit" data-section="items">Price Breakup</button>
+                    <button type="button" class="crm-edit-dropdown-item crm-section-edit" data-section="terms">Terms &amp; Conditions</button>
+                    <button type="button" class="crm-edit-dropdown-item crm-section-edit" data-section="notes">Notes</button>
                 </div>
             </div>
         @endif
@@ -40,23 +42,51 @@
 @endphp
 
     @include('quotations.partials.document-styles', ['context' => 'screen'])
+    <style>
+        .crm-edit-dropdown { position: relative; display: inline-flex; }
+        .crm-edit-dropdown-menu {
+            position: fixed;
+            z-index: 4000;
+            min-width: 240px;
+            max-width: min(360px, calc(100vw - 24px));
+            max-height: min(420px, calc(100vh - 100px));
+            overflow-y: auto;
+            background: #fff;
+            border: 1px solid var(--crm-border);
+            border-radius: 10px;
+            box-shadow: 0 10px 28px rgba(15, 23, 42, 0.18);
+            padding: 6px 0;
+        }
+        .crm-edit-dropdown-item {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 9px 14px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--crm-text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .crm-edit-dropdown-item:hover {
+            background: var(--crm-input-bg);
+            color: var(--crm-primary);
+        }
+    </style>
 
     <div class="quotation-preview-shell">
         <div class="quotation-preview-meta">
-            <span>PDF preview — same layout as downloaded file</span>
+            <span>Exact PDF preview — header on every page, page numbers in footer</span>
             <span class="crm-badge crm-badge-{{ $statusMap[$statusValue] ?? 'secondary' }}">{{ $statusValue }}</span>
         </div>
-
-        <div id="quotation-pages" class="quotation-pages"></div>
-
-        <div id="quotation-doc-source" class="quotation-doc-source quotation-document">
-            @include('quotations.partials.document-body', [
-                'quotation' => $quotation,
-                'company' => $company,
-                'bank' => $bank,
-                'termsContent' => $termsContent,
-            ])
-        </div>
+        <iframe
+            class="quotation-pdf-frame"
+            src="{{ route('quotations.preview', $quotation) }}"
+            title="Quotation PDF preview"
+        ></iframe>
     </div>
 
     @if ($canEdit)
@@ -82,15 +112,62 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    paginateQuotationPreview();
-
     const editBtn = document.getElementById('edit-menu-btn');
     const editMenu = document.getElementById('edit-menu');
+
+    function placeEditMenu() {
+        if (!editBtn || !editMenu) return;
+        if (editMenu.parentElement !== document.body) {
+            document.body.appendChild(editMenu);
+        }
+        const rect = editBtn.getBoundingClientRect();
+        editMenu.hidden = false;
+        const menuWidth = Math.max(240, editMenu.offsetWidth || 240);
+        let left = rect.right - menuWidth;
+        left = Math.max(12, Math.min(left, window.innerWidth - menuWidth - 12));
+        let top = rect.bottom + 6;
+        editMenu.style.left = `${left}px`;
+        editMenu.style.top = `${top}px`;
+        requestAnimationFrame(() => {
+            const h = editMenu.offsetHeight;
+            if (top + h > window.innerHeight - 12) {
+                editMenu.style.top = `${Math.max(12, rect.top - h - 6)}px`;
+            }
+        });
+    }
+
+    function openEditMenu() {
+        if (!editMenu || !editBtn) return;
+        editBtn.setAttribute('aria-expanded', 'true');
+        placeEditMenu();
+    }
+
+    function closeEditMenu() {
+        if (!editMenu || !editBtn) return;
+        editMenu.hidden = true;
+        editBtn.setAttribute('aria-expanded', 'false');
+    }
+
     editBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
         e.stopPropagation();
-        editMenu.style.display = editMenu.style.display === 'block' ? 'none' : 'block';
+        if (editMenu?.hidden) openEditMenu();
+        else closeEditMenu();
     });
-    document.addEventListener('click', () => { if (editMenu) editMenu.style.display = 'none'; });
+
+    document.addEventListener('click', (e) => {
+        if (!editMenu || editMenu.hidden) return;
+        if (e.target.closest('#edit-menu-btn') || e.target.closest('#edit-menu')) return;
+        closeEditMenu();
+    });
+
+    window.addEventListener('resize', () => {
+        if (editMenu && !editMenu.hidden) placeEditMenu();
+    });
+    window.addEventListener('scroll', () => {
+        if (editMenu && !editMenu.hidden) placeEditMenu();
+    }, true);
+
     editMenu?.addEventListener('click', (e) => e.stopPropagation());
 
     @if ($canEdit)
@@ -115,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentSection = null;
         currentItemId = null;
         err.textContent = '';
-        if (editMenu) editMenu.style.display = 'none';
+        closeEditMenu();
     }
 
     function openModal(section, itemId = null) {
@@ -133,7 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         body.innerHTML = renderForm(section, itemId);
         modal.style.display = 'flex';
-        if (editMenu) editMenu.style.display = 'none';
+        closeEditMenu();
 
         if (section === 'items') bindItemsUi();
         if (section === 'terms') {
@@ -366,58 +443,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     @endif
 });
-
-function paginateQuotationPreview() {
-    const source = document.getElementById('quotation-doc-source');
-    const container = document.getElementById('quotation-pages');
-    if (!source || !container) return;
-
-    const blocks = [...source.querySelectorAll('.quotation-block')];
-    if (!blocks.length) return;
-
-    const pageWidth = source.offsetWidth || Math.round(210 * 96 / 25.4);
-    const pageHeight = Math.round(297 * 96 / 25.4) - 56;
-    const measureBox = document.createElement('div');
-    measureBox.className = 'quotation-document';
-    measureBox.style.cssText = `position:absolute;left:-9999px;top:0;width:${pageWidth}px;visibility:hidden;`;
-    document.body.appendChild(measureBox);
-
-    let pageInner = createPage(container, 1);
-    let currentHeight = 0;
-    let pageNo = 1;
-
-    blocks.forEach(block => {
-        const clone = block.cloneNode(true);
-        measureBox.appendChild(clone);
-        const h = clone.offsetHeight;
-        measureBox.removeChild(clone);
-
-        if (currentHeight > 0 && currentHeight + h > pageHeight) {
-            pageNo += 1;
-            pageInner = createPage(container, pageNo);
-            currentHeight = 0;
-        }
-
-        pageInner.appendChild(block);
-        currentHeight += h;
-    });
-
-    measureBox.remove();
-    source.remove();
-    container.querySelectorAll('.quotation-doc-page').forEach((page, i, pages) => {
-        page.dataset.page = `Page ${i + 1} / ${pages.length}`;
-    });
-}
-
-function createPage(container, pageNo) {
-    const page = document.createElement('div');
-    page.className = 'quotation-doc-page';
-    page.dataset.page = `Page ${pageNo}`;
-    const inner = document.createElement('div');
-    inner.className = 'quotation-document';
-    page.appendChild(inner);
-    container.appendChild(page);
-    return inner;
-}
 </script>
 @endpush
