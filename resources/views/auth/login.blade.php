@@ -24,12 +24,7 @@
         </div>
 
         <div class="crm-field">
-            <div class="crm-field-row">
-                <label class="crm-field-label" for="password" style="margin:0;">Password</label>
-                @if (Route::has('password.request'))
-                    <a class="crm-link" href="{{ route('password.request') }}">Forgot Password?</a>
-                @endif
-            </div>
+            <label class="crm-field-label" for="password">Password</label>
             <div class="crm-input-wrap">
                 <input id="password" type="password" name="password" class="crm-input"
                        placeholder="Enter Password" required autocomplete="current-password">
@@ -42,10 +37,15 @@
             @enderror
         </div>
 
-        <label class="crm-checkbox">
-            <input type="checkbox" name="remember" id="remember_me">
-            Remember Me
-        </label>
+        <div class="crm-field-row" style="margin:20px 0;">
+            <label class="crm-checkbox" style="margin:0;">
+                <input type="checkbox" name="remember" id="remember_me">
+                Remember Me
+            </label>
+            @if (Route::has('password.request'))
+                <a class="crm-link" href="{{ route('password.request') }}">Forgot Password?</a>
+            @endif
+        </div>
 
         <button type="submit" class="crm-btn-primary">Sign In &rarr;</button>
     </form>
