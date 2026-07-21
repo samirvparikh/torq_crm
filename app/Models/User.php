@@ -19,9 +19,11 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'username',
+        'first_name',
+        'last_name',
         'email',
-        'phone',
+        'mobile',
         'alternate_phone',
         'designation',
         'avatar',
@@ -29,6 +31,13 @@ class User extends Authenticatable
         'last_login_at',
         'password',
     ];
+
+    /**
+     * Keep existing API and view consumers compatible while using the new columns.
+     *
+     * @var list<string>
+     */
+    protected $appends = ['name', 'phone'];
 
     /**
      * @var list<string>
@@ -54,6 +63,19 @@ class User extends Authenticatable
     public function isSuperAdmin(): bool
     {
         return $this->hasRole(RoleName::SuperAdmin->value);
+    }
+
+    public function getNameAttribute(): string
+    {
+        return trim(implode(' ', array_filter([
+            $this->first_name,
+            $this->last_name,
+        ]))) ?: $this->username;
+    }
+
+    public function getPhoneAttribute(): ?string
+    {
+        return $this->mobile;
     }
 
     public function canAccessAdministration(): bool

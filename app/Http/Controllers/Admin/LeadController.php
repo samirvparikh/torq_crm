@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\RoleName;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Lead\AssignLeadRequest;
 use App\Http\Requests\Lead\StoreLeadActionRequest;
@@ -53,7 +54,7 @@ class LeadController extends Controller
     {
         return view('leads.index', [
             'leadSources' => LeadSource::query()->where('is_active', true)->orderBy('sort_order')->get(),
-            'users' => User::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
+            'users' => User::query()->where('is_active', true)->orderBy('first_name')->get(['id', 'username', 'first_name', 'last_name']),
             'leadScope' => $scope,
             'pageTitle' => $scope === 'my' ? 'My Leads' : 'All Leads',
             'datatableRoute' => $scope === 'my'
@@ -167,7 +168,11 @@ class LeadController extends Controller
         return view('leads.show', [
             'lead' => $lead,
             'users' => request()->user()->canAccessAdministration()
-                ? User::query()->where('is_active', true)->orderBy('name')->get(['id', 'name'])
+                ? User::query()
+                    ->where('is_active', true)
+                    ->whereDoesntHave('roles', fn ($query) => $query->where('name', RoleName::SuperAdmin->value))
+                    ->orderBy('first_name')
+                    ->get(['id', 'username', 'first_name', 'last_name'])
                 : collect(),
         ]);
     }
@@ -239,7 +244,7 @@ class LeadController extends Controller
         return [
             'leadSources' => LeadSource::query()->where('is_active', true)->orderBy('sort_order')->get(),
             'categories' => Category::query()->where('is_active', true)->orderBy('sort_order')->get(),
-            'users' => User::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
+            'users' => User::query()->where('is_active', true)->orderBy('first_name')->get(['id', 'username', 'first_name', 'last_name']),
         ];
     }
 }

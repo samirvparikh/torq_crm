@@ -679,6 +679,10 @@ body.sidebar-collapsed .crm-header-brand-zone .crm-sidebar-toggle {
     overflow-y: auto;
 }
 
+.crm-sidebar-backdrop {
+    display: none;
+}
+
 .crm-sidebar-search {
     position: relative;
     padding: 0 12px 12px;
@@ -789,12 +793,20 @@ body.sidebar-collapsed .crm-nav-chevron {
     display: flex;
     align-items: center;
     gap: 10px;
+    width: 100%;
     padding: 9px 20px;
     color: var(--crm-muted);
     text-decoration: none;
     font-size: var(--crm-text-base);
     font-weight: 500;
+    font-family: inherit;
+    text-align: left;
+    background: transparent;
+    cursor: pointer;
     transition: all 0.15s;
+    border-top: 0;
+    border-right: 0;
+    border-bottom: 0;
     border-left: 3px solid transparent;
 }
 
@@ -1733,12 +1745,123 @@ body.sidebar-collapsed .crm-nav-chevron {
     .crm-form-grid .crm-field-span-2 { grid-column: auto; }
     .crm-lead-action-footer { align-items: stretch; flex-direction: column; }
     .crm-lead-action-footer .crm-btn { justify-content: center; }
-    .crm-sidebar { display: none; }
+
+    body.crm-app-body.sidebar-mobile-open {
+        overflow: hidden;
+    }
+
+    .crm-sidebar {
+        display: block;
+        position: fixed;
+        top: var(--crm-header-height);
+        bottom: 0;
+        left: 0;
+        z-index: 99;
+        width: min(84vw, 300px);
+        padding: 12px 0;
+        box-shadow: 10px 0 30px rgba(15, 23, 42, 0.18);
+        transform: translateX(-105%);
+        transition: transform 0.22s ease;
+    }
+
+    body.sidebar-mobile-open .crm-sidebar {
+        width: min(84vw, 300px);
+        transform: translateX(0);
+    }
+
+    body.sidebar-mobile-open .crm-nav-section-title,
+    body.sidebar-mobile-open .crm-nav-label {
+        display: block;
+    }
+
+    body.sidebar-mobile-open .crm-nav-link {
+        justify-content: flex-start;
+        width: 100%;
+        margin: 0;
+        padding: 9px 20px;
+        gap: 10px;
+        border-radius: 0;
+        border-left-width: 3px;
+    }
+
+    body.sidebar-mobile-open .crm-nav-link i {
+        width: 18px;
+    }
+
+    body.sidebar-mobile-open .crm-nav-chevron {
+        display: inline-block;
+        width: auto;
+    }
+
+    body.sidebar-mobile-open .crm-nav-group.is-open .crm-nav-submenu {
+        display: block;
+    }
+
+    .crm-sidebar-backdrop {
+        display: block;
+        position: fixed;
+        inset: var(--crm-header-height) 0 0;
+        z-index: 98;
+        padding: 0;
+        border: 0;
+        background: rgba(15, 23, 42, 0.45);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.22s ease, visibility 0.22s ease;
+    }
+
+    body.sidebar-mobile-open .crm-sidebar-backdrop {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .crm-header-brand-zone,
+    body.sidebar-collapsed .crm-header-brand-zone {
+        width: auto;
+        min-width: 0;
+        flex: 1;
+        justify-content: flex-start;
+        gap: 8px;
+        padding: 0 10px;
+        border-right: 0;
+    }
+
+    body.sidebar-collapsed .crm-header-brand-zone .crm-brand-icon {
+        display: flex;
+    }
+
+    body.sidebar-collapsed .crm-header-brand-zone .crm-brand-text {
+        display: inline;
+    }
+
+    .crm-header-body {
+        flex: 0 0 auto;
+        padding-right: 8px;
+    }
+
+    .crm-header-right {
+        gap: 4px;
+        padding-left: 0;
+    }
+
     .crm-header-meta { display: none; }
     .crm-user-info { display: none; }
     .crm-user-trigger > .bi-chevron-down { display: none; }
     .crm-search-kbd { display: none; }
-    .crm-header-search { width: 160px; }
+    .crm-header-search { display: none; }
+    .crm-header-actions > .crm-icon-btn[title="Full Screen"] { display: none; }
+    .crm-main { padding: 14px 12px; }
+    .crm-page-toolbar {
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .crm-brand-text { display: none; }
+    .crm-header-actions .crm-icon-btn:nth-child(-n+3) { display: none; }
+    .crm-main { padding: 12px 8px; }
 }
 
 

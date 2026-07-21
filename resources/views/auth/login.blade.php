@@ -14,11 +14,11 @@
         @csrf
 
         <div class="crm-field">
-            <label class="crm-field-label" for="email">Email / Username</label>
-            <input id="email" type="email" name="email" class="crm-input"
-                   value="{{ old('email') }}" placeholder="Enter Email or Username"
-                   required autofocus autocomplete="username">
-            @error('email')
+            <label class="crm-field-label" for="login">Email / Username / Mobile</label>
+            <input id="login" type="text" name="login" class="crm-input"
+                   value="{{ old('login') }}" placeholder="Enter email, username, or mobile"
+                   required autofocus autocomplete="username" autocapitalize="none" spellcheck="false">
+            @error('login')
                 <div class="crm-auth-error">{{ $message }}</div>
             @enderror
         </div>

@@ -9,7 +9,13 @@
 
 <header class="crm-header">
     <div class="crm-header-brand-zone">
-        <button type="button" class="crm-sidebar-toggle" id="crm-sidebar-toggle" title="Toggle menu" aria-label="Toggle sidebar">
+        <button type="button"
+                class="crm-sidebar-toggle"
+                id="crm-sidebar-toggle"
+                title="Toggle menu"
+                aria-label="Toggle sidebar"
+                aria-controls="crm-sidebar"
+                aria-expanded="false">
             <i class="bi bi-list"></i>
         </button>
 

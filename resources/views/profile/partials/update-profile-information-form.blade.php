@@ -15,10 +15,32 @@
         @method('patch')
 
         <div class="crm-field">
-            <label class="crm-field-label" for="name">{{ __('Name') }}</label>
-            <input id="name" name="name" type="text" class="crm-input"
-                   value="{{ old('name', $user->name) }}" required autofocus autocomplete="name">
-            @error('name')<div class="crm-auth-error">{{ $message }}</div>@enderror
+            <label class="crm-field-label" for="username">{{ __('Username') }}</label>
+            <input id="username" name="username" type="text" class="crm-input"
+                   value="{{ old('username', $user->username) }}" required autofocus autocomplete="username">
+            @error('username')<div class="crm-auth-error">{{ $message }}</div>@enderror
+        </div>
+
+        <div class="crm-form-grid">
+            <div class="crm-field">
+                <label class="crm-field-label" for="first_name">{{ __('First Name') }}</label>
+                <input id="first_name" name="first_name" type="text" class="crm-input"
+                       value="{{ old('first_name', $user->first_name) }}" required autocomplete="given-name">
+                @error('first_name')<div class="crm-auth-error">{{ $message }}</div>@enderror
+            </div>
+            <div class="crm-field">
+                <label class="crm-field-label" for="last_name">{{ __('Last Name') }}</label>
+                <input id="last_name" name="last_name" type="text" class="crm-input"
+                       value="{{ old('last_name', $user->last_name) }}" autocomplete="family-name">
+                @error('last_name')<div class="crm-auth-error">{{ $message }}</div>@enderror
+            </div>
+        </div>
+
+        <div class="crm-field">
+            <label class="crm-field-label" for="mobile">{{ __('Mobile') }}</label>
+            <input id="mobile" name="mobile" type="text" class="crm-input"
+                   value="{{ old('mobile', $user->mobile) }}" inputmode="numeric" autocomplete="tel">
+            @error('mobile')<div class="crm-auth-error">{{ $message }}</div>@enderror
         </div>
 
         <div class="crm-field">

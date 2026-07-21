@@ -12,12 +12,16 @@
             </a>
             @can('viewAny', App\Models\Lead::class)
                 <div class="crm-nav-group {{ request()->routeIs('leads.*') ? 'is-open' : '' }}">
-                    <a href="{{ route('leads.my') }}" class="crm-nav-link crm-nav-parent {{ request()->routeIs('leads.*') ? 'active' : '' }}" title="Leads">
+                    <button type="button"
+                            class="crm-nav-link crm-nav-parent {{ request()->routeIs('leads.*') ? 'active' : '' }}"
+                            title="Leads"
+                            aria-expanded="{{ request()->routeIs('leads.*') ? 'true' : 'false' }}"
+                            aria-controls="leads-submenu">
                         <i class="bi bi-funnel"></i>
                         <span class="crm-nav-label">Leads</span>
                         <i class="bi bi-chevron-down crm-nav-chevron"></i>
-                    </a>
-                    <div class="crm-nav-submenu">
+                    </button>
+                    <div class="crm-nav-submenu" id="leads-submenu">
                         <a href="{{ route('leads.my') }}" class="crm-nav-submenu-link {{ request()->routeIs('leads.my*') ? 'active' : '' }}">
                             <i class="bi bi-person-check"></i><span>My Leads</span>
                         </a>
@@ -29,12 +33,16 @@
             @endcan
             @can('followups.view')
                 <div class="crm-nav-group {{ request()->routeIs('followups.*') ? 'is-open' : '' }}">
-                    <a href="{{ route('followups.my') }}" class="crm-nav-link crm-nav-parent {{ request()->routeIs('followups.*') ? 'active' : '' }}" title="Followups">
+                    <button type="button"
+                            class="crm-nav-link crm-nav-parent {{ request()->routeIs('followups.*') ? 'active' : '' }}"
+                            title="Followups"
+                            aria-expanded="{{ request()->routeIs('followups.*') ? 'true' : 'false' }}"
+                            aria-controls="followups-submenu">
                         <i class="bi bi-calendar2-check"></i>
                         <span class="crm-nav-label">Followups</span>
                         <i class="bi bi-chevron-down crm-nav-chevron"></i>
-                    </a>
-                    <div class="crm-nav-submenu">
+                    </button>
+                    <div class="crm-nav-submenu" id="followups-submenu">
                         <a href="{{ route('followups.my') }}" class="crm-nav-submenu-link {{ request()->routeIs('followups.my*') || request()->routeIs('followups.index') ? 'active' : '' }}">
                             <i class="bi bi-person-check"></i><span>My Followups</span>
                         </a>

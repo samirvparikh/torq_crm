@@ -6,6 +6,7 @@ use App\Enums\RoleName;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\UserService;
+use App\Support\LoginIdentifier;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -42,8 +43,11 @@ class UserController extends Controller
             return [
                 'id' => $user->id,
                 'name' => $user->name,
+                'username' => $user->username,
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
                 'email' => $user->email,
-                'phone' => $user->phone,
+                'mobile' => $user->mobile,
                 'designation' => $user->designation,
                 'is_active' => $user->is_active,
                 'role' => $user->primaryRoleName(),
@@ -69,10 +73,19 @@ class UserController extends Controller
     {
         $this->authorize('create', User::class);
 
+        $mobile = $request->input('mobile');
+        $request->merge([
+            'username' => strtolower(trim((string) $request->input('username'))),
+            'email' => strtolower(trim((string) $request->input('email'))),
+            'mobile' => LoginIdentifier::normalizeMobile($mobile) ?? ($mobile !== null && trim((string) $mobile) !== '' ? $mobile : null),
+        ]);
+
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:191'],
+            'username' => ['required', 'string', 'min:3', 'max:50', 'regex:/^[a-z][a-z0-9._-]*$/', 'unique:users,username'],
+            'first_name' => ['required', 'string', 'max:100'],
+            'last_name' => ['nullable', 'string', 'max:100'],
             'email' => ['required', 'email', 'max:191', 'unique:users,email'],
-            'phone' => ['nullable', 'string', 'max:20'],
+            'mobile' => ['nullable', 'digits:10', 'unique:users,mobile'],
             'designation' => ['nullable', 'string', 'max:100'],
             'role' => ['required', 'string', Rule::in(RoleName::values())],
             'password' => ['required', 'confirmed', Password::defaults()],
@@ -96,10 +109,19 @@ class UserController extends Controller
     {
         $this->authorize('update', $user);
 
+        $mobile = $request->input('mobile');
+        $request->merge([
+            'username' => strtolower(trim((string) $request->input('username', $user->username))),
+            'email' => strtolower(trim((string) $request->input('email', $user->email))),
+            'mobile' => LoginIdentifier::normalizeMobile($mobile) ?? ($mobile !== null && trim((string) $mobile) !== '' ? $mobile : null),
+        ]);
+
         $data = $request->validate([
-            'name' => ['sometimes', 'required', 'string', 'max:191'],
+            'username' => ['sometimes', 'required', 'string', 'min:3', 'max:50', 'regex:/^[a-z][a-z0-9._-]*$/', Rule::unique('users', 'username')->ignore($user->id)],
+            'first_name' => ['sometimes', 'required', 'string', 'max:100'],
+            'last_name' => ['sometimes', 'nullable', 'string', 'max:100'],
             'email' => ['sometimes', 'required', 'email', 'max:191', Rule::unique('users', 'email')->ignore($user->id)],
-            'phone' => ['sometimes', 'nullable', 'string', 'max:20'],
+            'mobile' => ['sometimes', 'nullable', 'digits:10', Rule::unique('users', 'mobile')->ignore($user->id)],
             'designation' => ['sometimes', 'nullable', 'string', 'max:100'],
             'role' => ['sometimes', 'required', 'string', Rule::in(RoleName::values())],
             'password' => ['nullable', 'confirmed', Password::defaults()],

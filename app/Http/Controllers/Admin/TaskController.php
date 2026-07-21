@@ -21,7 +21,7 @@ class TaskController extends Controller
         $this->authorize('viewAny', Task::class);
 
         return view('tasks.index', [
-            'users' => User::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
+            'users' => User::query()->where('is_active', true)->orderBy('first_name')->get(['id', 'username', 'first_name', 'last_name']),
             'customers' => \App\Models\Customer::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
         ]);
     }

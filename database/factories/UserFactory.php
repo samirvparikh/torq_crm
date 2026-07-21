@@ -23,10 +23,15 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $firstName = fake()->firstName();
+        $lastName = fake()->lastName();
+
         return [
-            'name' => fake()->name(),
+            'username' => fake()->unique()->userName(),
+            'first_name' => $firstName,
+            'last_name' => $lastName,
             'email' => fake()->unique()->safeEmail(),
-            'phone' => fake()->numerify('9#########'),
+            'mobile' => fake()->unique()->numerify('9#########'),
             'alternate_phone' => null,
             'designation' => fake()->jobTitle(),
             'avatar' => null,

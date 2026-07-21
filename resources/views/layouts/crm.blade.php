@@ -27,6 +27,10 @@
 
     <div class="crm-app-shell">
         @include('partials.crm.sidebar')
+        <button type="button"
+                class="crm-sidebar-backdrop"
+                id="crm-sidebar-backdrop"
+                aria-label="Close navigation menu"></button>
 
         <main class="crm-main">
             @hasSection('breadcrumb')
@@ -50,14 +54,74 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         const toggle = document.getElementById('crm-sidebar-toggle');
+        const sidebar = document.getElementById('crm-sidebar');
+        const backdrop = document.getElementById('crm-sidebar-backdrop');
+        const mobileSidebar = window.matchMedia('(max-width: 768px)');
+
+        const closeMobileSidebar = () => {
+            document.body.classList.remove('sidebar-mobile-open');
+            toggle?.setAttribute('aria-expanded', 'false');
+        };
+
         toggle?.addEventListener('click', () => {
+            if (mobileSidebar.matches) {
+                const isOpen = document.body.classList.toggle('sidebar-mobile-open');
+                toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                return;
+            }
+
             document.body.classList.toggle('sidebar-collapsed');
+            toggle.setAttribute(
+                'aria-expanded',
+                document.body.classList.contains('sidebar-collapsed') ? 'false' : 'true'
+            );
             try {
                 localStorage.setItem(
                     'crm-sidebar-collapsed',
                     document.body.classList.contains('sidebar-collapsed') ? '1' : '0'
                 );
             } catch (e) {}
+        });
+
+        if (!mobileSidebar.matches) {
+            toggle?.setAttribute(
+                'aria-expanded',
+                document.body.classList.contains('sidebar-collapsed') ? 'false' : 'true'
+            );
+        }
+
+        backdrop?.addEventListener('click', closeMobileSidebar);
+
+        sidebar?.addEventListener('click', (event) => {
+            if (mobileSidebar.matches && event.target.closest('a')) {
+                closeMobileSidebar();
+            }
+        });
+
+        document.querySelectorAll('.crm-nav-parent').forEach((parent) => {
+            parent.addEventListener('click', () => {
+                const group = parent.closest('.crm-nav-group');
+                if (!group) return;
+
+                if (!mobileSidebar.matches && document.body.classList.contains('sidebar-collapsed')) {
+                    document.body.classList.remove('sidebar-collapsed');
+                    try {
+                        localStorage.setItem('crm-sidebar-collapsed', '0');
+                    } catch (e) {}
+                }
+
+                const isOpen = group.classList.toggle('is-open');
+                parent.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            });
+        });
+
+        mobileSidebar.addEventListener('change', closeMobileSidebar);
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && document.body.classList.contains('sidebar-mobile-open')) {
+                closeMobileSidebar();
+                toggle?.focus();
+            }
         });
     });
 

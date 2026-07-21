@@ -41,9 +41,10 @@
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th data-sort="name" data-dir="asc">Name</th>
+                        <th data-sort="username" data-dir="asc">Username</th>
+                        <th data-sort="first_name" data-dir="asc">Name</th>
                         <th data-sort="email" data-dir="asc">Email</th>
-                        <th data-sort="phone" data-dir="asc">Phone</th>
+                        <th data-sort="mobile" data-dir="asc">Mobile</th>
                         <th>Role</th>
                         <th data-sort="is_active" data-dir="asc">Status</th>
                         <th>Actions</th>
@@ -67,9 +68,11 @@
             <form id="user-form">
                 <div class="crm-modal-body">
                     <div class="crm-form-grid">
-                        <div class="crm-field"><label class="crm-field-label">Name *</label><input class="crm-input" name="name" required></div>
+                        <div class="crm-field"><label class="crm-field-label">Username *</label><input class="crm-input" name="username" required autocomplete="off"></div>
+                        <div class="crm-field"><label class="crm-field-label">First Name *</label><input class="crm-input" name="first_name" required></div>
+                        <div class="crm-field"><label class="crm-field-label">Last Name</label><input class="crm-input" name="last_name"></div>
                         <div class="crm-field"><label class="crm-field-label">Email *</label><input class="crm-input" type="email" name="email" required></div>
-                        <div class="crm-field"><label class="crm-field-label">Phone</label><input class="crm-input" name="phone"></div>
+                        <div class="crm-field"><label class="crm-field-label">Mobile</label><input class="crm-input" name="mobile" inputmode="numeric"></div>
                         <div class="crm-field"><label class="crm-field-label">Designation</label><input class="crm-input" name="designation"></div>
                         <div class="crm-field">
                             <label class="crm-field-label">Role *</label>
@@ -120,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
         form.reset();
         form.elements.password.required = !editId;
         if (data) {
-            ['name','email','phone','designation'].forEach(k => { if (form.elements[k]) form.elements[k].value = data[k] || ''; });
+            ['username','first_name','last_name','email','mobile','designation'].forEach(k => { if (form.elements[k]) form.elements[k].value = data[k] || ''; });
             if (form.elements.role) form.elements.role.value = data.role || '';
             form.elements.is_active.checked = !!data.is_active;
         }
@@ -144,14 +147,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const showDelete = canDelete && row.id !== currentUserId;
             return `<tr>
                 <td class="crm-sr">${tableSort.sr(m, i)}</td>
-                <td><strong>${row.name}</strong><div style="font-size:12px;color:var(--crm-muted);">${row.designation || ''}</div></td>
+                <td><strong>${row.username}</strong></td>
+                <td>${row.name}<div style="font-size:12px;color:var(--crm-muted);">${row.designation || ''}</div></td>
                 <td>${row.email}</td>
-                <td>${row.phone || '—'}</td>
+                <td>${row.mobile || '—'}</td>
                 <td>${roleLabel}</td>
                 <td><span class="crm-badge crm-badge-${row.is_active ? 'success' : 'secondary'}">${row.is_active ? 'Active' : 'Inactive'}</span></td>
                 <td class="crm-action-menu">${canEdit ? `<button type="button" data-edit='${JSON.stringify(row).replace(/'/g,"&#39;")}' title="Edit"><i class="bi bi-pencil"></i></button>` : ''}${showDelete ? `<button type="button" data-delete="${row.id}" title="Delete"><i class="bi bi-trash"></i></button>` : ''}</td>
             </tr>`;
-        }).join('') || '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--crm-muted);">No users found</td></tr>';
+        }).join('') || '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--crm-muted);">No users found</td></tr>';
         document.getElementById('record-info').textContent = `Showing ${m.total ? (m.current_page-1)*m.per_page+1 : 0}-${Math.min(m.current_page*m.per_page,m.total)} of ${m.total} records`;
         document.getElementById('pagination').innerHTML = `<button ${m.current_page<=1?'disabled':''} data-page="${m.current_page-1}">&lsaquo;</button><span class="active">${m.current_page}</span><button ${m.current_page>=m.last_page?'disabled':''} data-page="${m.current_page+1}">&rsaquo;</button>`;
         currentPage = m.current_page;

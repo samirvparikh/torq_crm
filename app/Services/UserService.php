@@ -21,9 +21,11 @@ class UserService
         if (! empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($builder) use ($search) {
-                $builder->where('name', 'like', "%{$search}%")
+                $builder->where('username', 'like', "%{$search}%")
+                    ->orWhere('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('mobile', 'like', "%{$search}%")
                     ->orWhere('designation', 'like', "%{$search}%");
             });
         }
@@ -37,7 +39,7 @@ class UserService
         }
 
         \App\Support\DatatableSort::apply($query, $filters, [
-            'id', 'name', 'email', 'phone', 'is_active', 'created_at',
+            'id', 'username', 'first_name', 'last_name', 'email', 'mobile', 'is_active', 'created_at',
         ], 'id', 'desc');
 
         return $query->paginate($perPage);
@@ -53,6 +55,8 @@ class UserService
             unset($data['role'], $data['password_confirmation']);
 
             $data['email_verified_at'] = $data['email_verified_at'] ?? now();
+            $data['username'] = strtolower($data['username']);
+            $data['email'] = strtolower($data['email']);
             $data['is_active'] = array_key_exists('is_active', $data)
                 ? (bool) $data['is_active']
                 : true;
@@ -82,6 +86,14 @@ class UserService
 
             if (array_key_exists('is_active', $data)) {
                 $data['is_active'] = (bool) $data['is_active'];
+            }
+
+            if (isset($data['username'])) {
+                $data['username'] = strtolower($data['username']);
+            }
+
+            if (isset($data['email'])) {
+                $data['email'] = strtolower($data['email']);
             }
 
             $user->update($data);

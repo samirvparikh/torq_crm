@@ -62,11 +62,11 @@ class RolePermissionTest extends TestCase
         $user->assignRole(RoleName::Marketing->value);
 
         $response = $this->post('/login', [
-            'email' => 'inactive@gmail.com',
+            'login' => 'inactive@gmail.com',
             'password' => 'password',
         ]);
 
-        $response->assertSessionHasErrors('email');
+        $response->assertSessionHasErrors('login');
         $this->assertGuest();
     }
 

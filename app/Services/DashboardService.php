@@ -132,7 +132,7 @@ class DashboardService
             ->groupBy('assigned_to')
             ->orderByDesc('won')
             ->limit($limit)
-            ->with('assignee:id,name')
+            ->with('assignee:id,username,first_name,last_name')
             ->get()
             ->map(fn ($row) => [
                 'user' => $row->assignee?->name ?? 'Unknown',
