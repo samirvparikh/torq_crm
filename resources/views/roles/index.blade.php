@@ -22,8 +22,10 @@
         <div class="crm-content-card-body">
             <div class="crm-filters">
                 <input type="text" id="search" class="crm-input" placeholder="Search roles...">
-                <button type="button" id="filter-btn" class="crm-btn crm-btn-primary-sm"><i class="bi bi-funnel"></i> Filter</button>
-                <button type="button" id="reset-btn" class="crm-btn"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+                <div class="crm-filters-actions">
+                    <button type="button" id="filter-btn" class="crm-btn crm-btn-primary-sm"><i class="bi bi-funnel"></i> Filter</button>
+                    <button type="button" id="reset-btn" class="crm-btn"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+                </div>
             </div>
         </div>
         <div class="crm-table-wrap">

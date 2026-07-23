@@ -33,8 +33,10 @@
                 </select>
                 <input type="date" id="date-from" class="crm-input" title="From date">
                 <input type="date" id="date-to" class="crm-input" title="To date">
-                <button type="button" id="filter-btn" class="crm-btn crm-btn-primary-sm"><i class="bi bi-funnel"></i> Filter</button>
-                <button type="button" id="reset-btn" class="crm-btn"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+                <div class="crm-filters-actions">
+                    <button type="button" id="filter-btn" class="crm-btn crm-btn-primary-sm"><i class="bi bi-funnel"></i> Filter</button>
+                    <button type="button" id="reset-btn" class="crm-btn"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+                </div>
             </div>
         </div>
 

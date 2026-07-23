@@ -44,12 +44,10 @@
                         <option value="{{ $source->id }}">{{ $source->name }}</option>
                     @endforeach
                 </select>
-                <button type="button" id="followup-filter-btn" class="crm-btn crm-btn-primary-sm">
-                    <i class="bi bi-funnel"></i> Filter
-                </button>
-                <button type="button" id="followup-reset-btn" class="crm-btn">
-                    <i class="bi bi-arrow-counterclockwise"></i> Reset
-                </button>
+                <div class="crm-filters-actions">
+                    <button type="button" id="followup-filter-btn" class="crm-btn crm-btn-primary-sm"><i class="bi bi-funnel"></i> Filter</button>
+                    <button type="button" id="followup-reset-btn" class="crm-btn"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+                </div>
             </div>
         </div>
 

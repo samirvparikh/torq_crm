@@ -1459,6 +1459,18 @@ body.sidebar-collapsed .crm-nav-chevron {
     white-space: nowrap;
 }
 
+@media (max-width: 768px) {
+    .crm-filters .crm-input {
+        width: 100%;
+        flex: 1 1 100%;
+    }
+
+    .crm-filters-actions {
+        width: 100%;
+        flex: 1 1 100%;
+    }
+}
+
 /* ── Form Grid ── */
 .crm-form-grid {
     display: grid;
